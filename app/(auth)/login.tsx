@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { loginSchema, type LoginInput } from "@/schema/auth";
 import { loginWithPassword } from "@/features/auth/api";
 
@@ -35,59 +35,73 @@ export default function LoginScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center bg-white px-6">
-      <Text className="mb-8 text-2xl font-bold text-ink">로그인</Text>
-
-      <Text className="mb-1 text-sm text-ink">이메일</Text>
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
-            placeholder="you@example.com"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            onChangeText={onChange}
-            onBlur={onBlur}
-            value={value ?? ""}
-          />
-        )}
-      />
-      {errors.email && <Text className="mb-3 text-sm text-red-500">{errors.email.message}</Text>}
-      {!errors.email && <View className="mb-3" />}
-
-      <Text className="mb-1 text-sm text-ink">비밀번호</Text>
-      <Controller
-        control={control}
-        name="password"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
-            placeholder="********"
-            secureTextEntry
-            onChangeText={onChange}
-            onBlur={onBlur}
-            value={value ?? ""}
-          />
-        )}
-      />
-      {errors.password && <Text className="mb-3 text-sm text-red-500">{errors.password.message}</Text>}
-      {!errors.password && <View className="mb-3" />}
-
-      {serverError && <Text className="mb-3 text-sm text-red-500">{serverError}</Text>}
-
-      <Pressable
-        className="mb-4 items-center rounded-lg bg-amber py-3 disabled:opacity-50"
-        onPress={handleSubmit(onSubmit)}
-        disabled={isSubmitting}
+    <KeyboardAvoidingView
+      className="flex-1 bg-white"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerClassName="flex-grow justify-center px-6"
+        keyboardShouldPersistTaps="handled"
       >
-        <Text className="font-semibold text-ink">{isSubmitting ? "로그인 중..." : "로그인"}</Text>
-      </Pressable>
+        <Text className="mb-8 text-2xl font-bold text-ink">로그인</Text>
 
-      <Link href="/(auth)/signup" className="text-center text-sm text-ink-soft">
-        아직 계정이 없으신가요? 회원가입
-      </Link>
-    </View>
+        <Text className="mb-1 text-sm text-ink">이메일</Text>
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
+              placeholder="you@example.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              onChangeText={(text) => {
+                setServerError(null);
+                onChange(text);
+              }}
+              onBlur={onBlur}
+              value={value ?? ""}
+            />
+          )}
+        />
+        {errors.email && <Text className="mb-3 text-sm text-red-500">{errors.email.message}</Text>}
+        {!errors.email && <View className="mb-3" />}
+
+        <Text className="mb-1 text-sm text-ink">비밀번호</Text>
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
+              placeholder="********"
+              secureTextEntry
+              onChangeText={(text) => {
+                setServerError(null);
+                onChange(text);
+              }}
+              onBlur={onBlur}
+              value={value ?? ""}
+            />
+          )}
+        />
+        {errors.password && <Text className="mb-3 text-sm text-red-500">{errors.password.message}</Text>}
+        {!errors.password && <View className="mb-3" />}
+
+        {serverError && <Text className="mb-3 text-sm text-red-500">{serverError}</Text>}
+
+        <Pressable
+          className="mb-4 items-center rounded-lg bg-amber py-3 disabled:opacity-50"
+          onPress={handleSubmit(onSubmit)}
+          disabled={isSubmitting}
+        >
+          <Text className="font-semibold text-ink">{isSubmitting ? "로그인 중..." : "로그인"}</Text>
+        </Pressable>
+
+        <Link href="/(auth)/signup" className="text-center text-sm text-ink-soft">
+          아직 계정이 없으신가요? 회원가입
+        </Link>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

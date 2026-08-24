@@ -4,6 +4,42 @@
 
 ---
 
+## 2026-08-24 (2) — 헤드리스 에뮬레이터 구축 + 실기기 버그 다수 수정, `dev` 브랜치 전환
+
+**헤드리스 Android 에뮬레이터로 자체 테스트 환경 구축**
+- `brew install --cask android-commandlinetools` + arm64 시스템 이미지(API 34)로 Android Studio 없이 커맨드라인만으로 에뮬레이터 세팅(`teamup-test` AVD). `adb`/`uiautomator dump`로 좌표 잡아 화면 조작·`screencap`으로 캡처하는 방식으로 셀프 테스트 진행.
+- `-gpu swiftshader_indirect`(소프트웨어 렌더링)가 리소스 제약으로 ANR(`System UI isn't responding` 등)을 반복적으로 일으킴 — `-gpu off`는 화면 자체가 안 그려져서(screencap 항상 검정) 대안 안 됨. 결국 swiftshader로 유지하되 재시작으로 회복하는 방식으로 운용. 이 불안정성은 **테스트 환경 자체의 한계**이며 앱 코드와 무관.
+- scrcpy로 실시간 미러링도 시도했으나 장시간 구동으로 인한 고부하(load average 9.6)로 입력이 씹히는 현상 발생 — 에뮬레이터 종료로 정리.
+
+**지원 상태 관련 버그 재검증** — 웹 레포에서 `updateTag`→`revalidateTag` 근본 수정 배포 후:
+- `curl`로 프로덕션 직접 검증(`alreadyApplied: true`, `POST /api/applications` → 201 정상) + 앱에서 완전히 새 모집에 지원해 에러 없이 "지원 완료" 전환 확인. 두 버그 다 해결 완료.
+
+**실기기(사용자 폰)에서 발견된 버그 다수 수정** (`docs/testing/2차_알파테스트_체크리스트.md` 기반):
+- `app/(auth)/login.tsx`, `signup.tsx`: `KeyboardAvoidingView`+`ScrollView` 미적용으로 키보드가 비밀번호 입력란을 가려 스크롤 불가능하던 문제 수정.
+- 같은 화면: 필드 재입력 시 이전 제출의 `serverError`가 안 지워져 zod 에러와 서버 에러가 동시에 뜨던 문제 — `onChangeText`에서 `serverError` 클리어하도록 수정.
+- `src/features/auth/api.ts`: Supabase가 계정 열거 공격 방지로 이미 가입된 이메일도 에러 없이 "성공"처럼 응답하는 것 때문에 중복가입이 그냥 통과되던 문제 — `data.user.identities.length === 0`(공식 문서 판별법)로 감지해 "이미 가입된 이메일입니다" 에러 처리.
+- `src/features/dashboard/queries.ts`: 마이페이지가 60초 `staleTime` 캐시 때문에 지원 수락/거절(모집 작성자가 바꾸는 상태) 반영이 늦던 문제 — `useFocusEffect`로 탭 진입 시마다 강제 `refetch()`.
+- `app/(app)/_layout.tsx`: 하단 탭 아이콘이 깨진 상자로 보이던 원인 특정 — `tabBarIcon` 자체를 설정 안 해서 React Navigation의 `MissingIcon` placeholder가 뜨고 있었음(이미지 로딩 실패 아님). `@expo/vector-icons`(Ionicons) 설치해 아이콘 추가.
+- `assets/splash-icon.png`: 임시 플레이스홀더 대신 웹 실제 브랜드 로고(`~/Desktop/TeamUp/public/brand/logo-symbol.png`, 180×180)로 교체. **네이티브 에셋이라 EAS 재빌드 전엔 폰에 반영 안 됨.**
+- `src/lib/api-client.ts`, `src/lib/query-client.ts`: API 실패·응답 파싱 실패·React Query 에러를 콘솔에 로깅하도록 추가(이전엔 콘솔 로그가 코드에 단 한 줄도 없어서 devtools가 항상 비어 보였음).
+
+**조사했지만 재현/확정 못 한 것**:
+- `GET /api/dashboard` 500(빈 응답, "데이터 껐다 켰다" 시점) — 코드엔 지난번 `updateTag` 같은 버그 패턴 없음 확인. 네트워크 재연결 중 응답이 끊긴 것으로 추정, 안정된 네트워크에서 재현되면 재조사 필요.
+- 회원가입 이메일 필드 blur 시 영어 에러 메시지 — zod 스키마+`zodResolver` 직접 테스트해보면 한글 정상 출력됨. Android 키보드(Gboard) 자체 자동완성 힌트일 가능성.
+
+**범위 확인 (버그 아님)**:
+- 모집 목록에 커뮤니티 글이 섞인다는 보고 → 코드 확인 결과 안 섞임. 실제론 "모바일에 커뮤니티 화면 자체가 없음"을 말한 것 — `rn-pilot-plan.md`에 원래 Tier 2 제외 항목으로 의도된 범위임을 확인.
+- 로그인 화면으로 바로 진입하는 UX, 모바일 글 등록(모집 생성) 화면 — 둘 다 사용자와 논의 후 **보류/범위 유지**로 결정.
+
+**브랜치 전략 변경**: 앞으로 이 레포는 `main` 대신 `dev` 브랜치에서 작업. 위 내역 전부 `dev`에 커밋(`959966d`) + push 완료, `main`은 안 건드림.
+
+**다음 할 일**:
+- [ ] 폰에서 재테스트 (Metro 재연결만 하면 스플래시 제외 전부 반영됨).
+- [ ] 통과하면 스플래시 로고 반영을 위해 `eas build -p android --profile development` 재빌드.
+- [ ] `dev` → `main` 머지 시점은 추후 결정.
+
+---
+
 ## 2026-08-24 — 지원 상태 미표기 버그 (실기기 발견)
 
 **증상**: 실기기(Android dev build)에서 모집 상세 → 지원하기 시 "지원 처리 중 오류가 발생했습니다" 뜨거나, 이미 지원한 모집인데 "지원하기" 버튼이 계속 활성 상태로 보임.
