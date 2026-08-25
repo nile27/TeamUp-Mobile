@@ -1,3 +1,14 @@
+## 2026-08-25 (4) — 모집 목록 Realtime 반영
+
+**실기기 테스트 피드백**: 웹에서 새 모집을 올려도 모바일 목록엔 새로고침 전까진 안 보임 — 지원 상태처럼 Realtime이 안 붙어있던 부분.
+
+**수정**: `src/features/recruit/queries.ts`의 `useRecruitList`에 `Recruit` 테이블 `postgres_changes` 구독 추가(`event: "*"` — 생성/수정/상태변경 전부) → 변경 시 `recruit-list` 쿼리 무효화. 모집 목록은 비로그인도 보는 공개 데이터라 로그인 여부와 무관하게 항상 구독.
+- **DB 설정**: `Recruit` 테이블에 RLS 활성화 + "누구나 SELECT 가능" 정책 추가(원래도 `GET /api/recruit`가 토큰 없이 공개 응답하던 데이터라 노출 범위 변화 없음) 후 `supabase_realtime` publication에 등록.
+
+**다음 할 일**:
+- [ ] 웹에서 모집 새로 등록/상태 변경 → 폰 목록 화면 열어둔 채로 바로 반영되는지 실기기 확인.
+
+---
 # DEVLOG.md — 모바일 작업 로그
 
 > 데일리 작업 로그. 작업 끝낼 때 맨 위에 추가. (그날 한 일 · 막힌 것 · 다음 할 일)
