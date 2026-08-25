@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { useSession } from "@/features/auth/use-session";
 import { useRecruitDetail } from "@/features/recruit/queries";
 import { useApplyToRecruit } from "@/features/recruit/mutations";
 import { RECRUIT_TYPE_LABEL } from "@/config/labels";
@@ -9,6 +10,7 @@ import { COLORS } from "@/config/theme";
 
 export default function RecruitDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { session } = useSession();
   const { data: recruit, isLoading, isError, refetch } = useRecruitDetail(id);
   const applyMutation = useApplyToRecruit(id);
   const [applyError, setApplyError] = useState<string | null>(null);
@@ -35,6 +37,10 @@ export default function RecruitDetailScreen() {
   const applied = recruit.alreadyApplied || applyMutation.isSuccess;
 
   const handleApply = () => {
+    if (!session) {
+      router.push("/(auth)/login");
+      return;
+    }
     setApplyError(null);
     applyMutation.mutate(undefined, {
       onError: (error) => {
@@ -88,7 +94,13 @@ export default function RecruitDetailScreen() {
           className="items-center rounded-lg bg-amber py-3 disabled:opacity-50"
         >
           <Text className="font-semibold text-ink">
-            {applied ? "지원 완료" : applyMutation.isPending ? "지원 중..." : "지원하기"}
+            {applied
+              ? "지원 완료"
+              : applyMutation.isPending
+                ? "지원 중..."
+                : session
+                  ? "지원하기"
+                  : "로그인하고 지원하기"}
           </Text>
         </Pressable>
       </View>

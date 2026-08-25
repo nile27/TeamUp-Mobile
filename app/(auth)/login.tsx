@@ -98,9 +98,13 @@ export default function LoginScreen() {
           <Text className="font-semibold text-ink">{isSubmitting ? "로그인 중..." : "로그인"}</Text>
         </Pressable>
 
-        <Link href="/(auth)/signup" className="text-center text-sm text-ink-soft">
+        <Link href="/(auth)/signup" className="mb-6 text-center text-sm text-ink-soft">
           아직 계정이 없으신가요? 회원가입
         </Link>
+
+        <Pressable onPress={() => router.replace("/(app)/recruit")}>
+          <Text className="text-center text-sm text-ink-soft underline">로그인 없이 둘러보기</Text>
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );

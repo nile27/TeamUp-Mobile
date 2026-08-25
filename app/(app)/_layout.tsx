@@ -1,11 +1,11 @@
-import { Redirect, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, View } from "react-native";
 import { useSession } from "@/features/auth/use-session";
 import { COLORS } from "@/config/theme";
 
 export default function AppLayout() {
-  const { session, isLoading } = useSession();
+  const { isLoading } = useSession();
 
   if (isLoading) {
     return (
@@ -15,10 +15,8 @@ export default function AppLayout() {
     );
   }
 
-  if (!session) {
-    return <Redirect href="/(auth)/login" />;
-  }
-
+  // 모집 목록·상세는 비로그인도 볼 수 있음(API가 토큰 없이도 응답) — "둘러보기".
+  // 로그인이 실제로 필요한 지점(지원하기, 마이페이지)은 각 화면에서 개별적으로 가드.
   return (
     <Tabs
       screenOptions={{

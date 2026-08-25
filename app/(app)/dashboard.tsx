@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
+import { useSession } from "@/features/auth/use-session";
 import { useDashboard } from "@/features/dashboard/queries";
 import { supabase } from "@/server/supabase";
 import { COLORS } from "@/config/theme";
@@ -11,17 +12,32 @@ const APPLICATION_STATUS_LABEL: Record<string, string> = {
 };
 
 export default function DashboardScreen() {
-  const { data, isLoading, isError, refetch } = useDashboard();
+  const { session, isLoading: isSessionLoading } = useSession();
+  const { data, isLoading, isError, refetch } = useDashboard(!!session);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.replace("/(auth)/login");
   };
 
-  if (isLoading) {
+  if (isSessionLoading || (session && isLoading)) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator color={COLORS.amber} />
+      </View>
+    );
+  }
+
+  if (!session) {
+    return (
+      <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
+        <Text className="text-ink-soft">마이페이지는 로그인 후 이용할 수 있어요.</Text>
+        <Pressable
+          onPress={() => router.push("/(auth)/login")}
+          className="rounded-lg bg-amber px-4 py-2"
+        >
+          <Text className="font-semibold text-ink">로그인하기</Text>
+        </Pressable>
       </View>
     );
   }
