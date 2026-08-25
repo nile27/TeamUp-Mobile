@@ -71,7 +71,10 @@ export default function CommunityDetailScreen() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      // Android는 Expo 기본값(adjustResize)이 OS 레벨에서 이미 화면을 줄여주는데,
+      // 여기에 "height" 모드까지 더하면 절대 위치인 하단 입력창 계산이 꼬여서 오히려
+      // 안 밀리는 문제가 있었음 — Android는 OS 리사이즈에 맡기고 behavior 없이 둠.
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
       <FlatList
