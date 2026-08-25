@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { loginSchema, type LoginInput } from "@/schema/auth";
 import { loginWithPassword } from "@/features/auth/api";
+import { API_BASE_URL } from "@/config/env";
 
 export default function LoginScreen() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -43,7 +44,11 @@ export default function LoginScreen() {
         contentContainerClassName="flex-grow justify-center px-6"
         keyboardShouldPersistTaps="handled"
       >
-        <Text className="mb-8 text-2xl font-bold text-ink">로그인</Text>
+        <Text className="mb-2 text-2xl font-bold text-ink">로그인</Text>
+
+        <Pressable onPress={() => Linking.openURL(API_BASE_URL)} className="mb-6">
+          <Text className="text-sm text-ink-soft underline">TeamUp이 궁금하다면? 서비스 소개 보기</Text>
+        </Pressable>
 
         <Text className="mb-1 text-sm text-ink">이메일</Text>
         <Controller
