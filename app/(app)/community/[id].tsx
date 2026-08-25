@@ -75,12 +75,13 @@ export default function CommunityDetailScreen() {
             <Pressable
               onPress={handleLike}
               disabled={likeMutation.isPending}
-              className={`self-start rounded-full border px-4 py-2 ${
+              className={`flex-row items-center gap-1.5 self-start rounded-full border px-4 py-2 ${
                 post.alreadyLiked ? "border-amber bg-amber-soft" : "border-gray-300"
               }`}
             >
-              <Text className={post.alreadyLiked ? "text-ink" : "text-ink-soft"}>
-                좋아요 {post._count.likes}
+              <Text className="text-base">{post.alreadyLiked ? "❤️" : "🤍"}</Text>
+              <Text className={post.alreadyLiked ? "font-semibold text-ink" : "text-ink-soft"}>
+                {post._count.likes}
               </Text>
             </Pressable>
 

@@ -81,7 +81,7 @@ function CommunityCard({ post }: { post: CommunityPost }) {
       </Text>
       <View className="flex-row gap-3">
         <Text className="text-xs text-ink-soft">{post.author.nickname}</Text>
-        <Text className="text-xs text-ink-soft">좋아요 {post._count.likes}</Text>
+        <Text className="text-xs text-ink-soft">❤️ {post._count.likes}</Text>
         <Text className="text-xs text-ink-soft">댓글 {post._count.comments}</Text>
       </View>
     </Pressable>
