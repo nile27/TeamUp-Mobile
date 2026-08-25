@@ -71,16 +71,13 @@ export default function CommunityDetailScreen() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white"
-      // Android는 Expo 기본값(adjustResize)이 OS 레벨에서 이미 화면을 줄여주는데,
-      // 여기에 "height" 모드까지 더하면 절대 위치인 하단 입력창 계산이 꼬여서 오히려
-      // 안 밀리는 문제가 있었음 — Android는 OS 리사이즈에 맡기고 behavior 없이 둠.
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <FlatList
+        className="flex-1"
         data={post.comments}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="gap-3 p-4 pb-24"
+        contentContainerClassName="gap-3 p-4"
         ListHeaderComponent={
           <View className="mb-4 gap-3">
             <Text className="text-xs font-medium text-amber-deep">{COMMUNITY_TAG_LABEL[post.tag]}</Text>
@@ -113,7 +110,7 @@ export default function CommunityDetailScreen() {
         )}
       />
 
-      <View className="absolute bottom-0 left-0 right-0 border-t border-gray-100 bg-white p-4">
+      <View className="border-t border-gray-100 bg-white p-4">
         {commentError && <Text className="mb-2 text-sm text-red-500">{commentError}</Text>}
         <View className="flex-row items-center gap-2">
           <TextInput
