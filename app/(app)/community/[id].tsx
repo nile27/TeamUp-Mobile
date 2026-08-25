@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useSession } from "@/features/auth/use-session";
 import { useCommunityDetail } from "@/features/community/queries";
 import { useAddCommunityComment, useToggleCommunityLike } from "@/features/community/mutations";
@@ -60,7 +69,11 @@ export default function CommunityDetailScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <KeyboardAvoidingView
+      className="flex-1 bg-white"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+    >
       <FlatList
         data={post.comments}
         keyExtractor={(item) => item.id}
@@ -115,6 +128,6 @@ export default function CommunityDetailScreen() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
