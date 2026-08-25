@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-08-25 (1b) — 마이페이지 지원 상태 Supabase Realtime 반영
+
+**마이페이지 지원 상태를 Supabase Realtime으로 즉시 반영**
+- 기존엔 마이페이지 탭에 다시 들어와야(`useFocusEffect`) 지원 수락/거절 상태가 갱신됐음(최대 60초 `staleTime` + 포커스 시점 의존). Gmail처럼 화면을 안 만져도 바로 반영되길 원해서 Supabase Realtime 도입.
+- **DB 설정(Supabase 프로젝트, 1회성 마이그레이션)**: `Application` 테이블 RLS 활성화 + "본인 행만 SELECT 가능" 정책 추가(`auth.uid() = "applicantId"`) 후 `supabase_realtime` publication에 등록. 웹의 Prisma 연결은 `postgres` 역할(`rolbypassrls = true`)이라 RLS 추가가 웹 동작에 영향 없음을 사전 확인.
+- **모바일**: `src/features/dashboard/queries.ts`에 `postgres_changes` 구독 추가 — 내 `applicantId`로 필터링된 `Application` UPDATE 이벤트 수신 시 `queryClient.invalidateQueries(["dashboard"])`. 웹 API/Server Action 코드는 전혀 변경 없음(Realtime은 Postgres WAL을 Supabase가 직접 감시하는 관리형 서비스라 서버 코드 개입 불필요).
+- 기존 `useFocusEffect` 강제 refetch는 폴백으로 유지(구독 연결 전 진입 시 등 대비).
+
+**다음 할 일**:
+- [ ] 웹에서 지원 수락 처리 → 폰 마이페이지 화면 열어둔 채로 바로 반영되는지 실기기 확인.
+
+---
+
 ## 2026-08-25 (1a) — 로그인 화면에 웹 랜딩 링크 추가
 
 **로그인 화면에 "서비스 소개 보기" 링크 추가**
