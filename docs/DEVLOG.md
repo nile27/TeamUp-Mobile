@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-08-25 (2) — 커뮤니티 화면 신설
+
+**배경**: `rn-pilot-plan.md`에 Tier 2(제외)로 분류돼 있던 커뮤니티 기능 — 당시엔 웹에 `/api/community` REST 엔드포인트 자체가 없어서 보류했던 것. 웹에서 새로 API를 만들어 [Scalar 문서](https://registry.scalar.com/share/apis/TiPiGKoGGYUrgvqZbnmHt)로 공유받아 확인 후 진행.
+
+**API 확인**: `GET /api/community`(목록, `tag`/`page` 쿼리), `GET /api/community/[id]`(상세+댓글+`alreadyLiked`), `POST /api/community/[id]/like`(좋아요 토글), `POST /api/community/[id]/comments`(댓글 작성). **글 작성(POST) 엔드포인트는 아직 없음** — 조회·좋아요·댓글까지만 구현.
+
+**추가한 것** (기존 `features/recruit` 구조 그대로 따름):
+- `src/features/community/{types,api,queries,mutations}.ts`
+- `app/(app)/community/index.tsx` — 태그 필터(전체/아이디어/질문/기타) + 목록, 빈/로딩(스켈레톤)/에러 3상태 처리
+- `app/(app)/community/[id].tsx` — 상세 + 댓글 목록 + 좋아요 토글 + 댓글 작성. 비로그인 상태로 좋아요/댓글 시도 시 로그인 화면으로 유도(모집 지원 흐름과 동일 패턴).
+- `app/(app)/_layout.tsx`: "커뮤니티" 탭 추가.
+- `src/config/labels.ts`: `COMMUNITY_TAG_LABEL`, `COMMUNITY_TAG_FILTERS` 추가(웹 `src/config/labels.ts`에서 복붙).
+- `docs/api-contract.md`: 커뮤니티 4개 엔드포인트 문서화(웹 쪽 문서와 동일 내용으로 동기화).
+
+**검증**: `npx tsc --noEmit` 통과. 실기기 테스트는 아직 — 다음 라운드에서 확인 예정(글 작성 없이 조회/좋아요/댓글까지).
+
+**다음 할 일**:
+- [ ] 실기기에서 커뮤니티 목록/상세/좋아요/댓글 흐름 확인.
+- [ ] 글 작성(POST) API가 추후 생기면 작성 화면 추가 검토.
+
+---
+
 ## 2026-08-25 (1b) — 마이페이지 지원 상태 Supabase Realtime 반영
 
 **마이페이지 지원 상태를 Supabase Realtime으로 즉시 반영**

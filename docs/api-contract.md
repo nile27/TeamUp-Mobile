@@ -124,6 +124,55 @@ Supabase Auth 회원가입 직후 Prisma `User` 프로필 레코드 생성(없�
 
 ---
 
+## `GET /api/community`
+
+커뮤니티 글 목록. 페이지당 10개.
+
+**쿼리**: `tag`(`IDEA`|`QUESTION`|`ETC`, 생략 시 전체, 잘못된 값은 무시) · `page`(기본 1)
+
+**응답 200**
+```json
+{ "data": { "posts": [<CommunityPost>], "page": 1, "totalPages": 3 } }
+```
+
+---
+
+## `GET /api/community/[id]`
+
+커뮤니티 글 상세 + 댓글.
+
+**응답**
+- `200` `{ "data": <CommunityPost> & { comments: [<Comment>], alreadyLiked: boolean } }` — `alreadyLiked`는 로그인 상태로 조회했을 때만 실제 값, 비로그인은 항상 `false`(모집 `alreadyApplied`와 동일 패턴)
+- `404` 찾을 수 없음
+
+---
+
+## `POST /api/community/[id]/like`
+
+좋아요 토글. **인증 필요.**
+
+**응답**
+- `200` `{ "data": { "liked": boolean, "count": number } }`
+- `401` 미인증
+
+---
+
+## `POST /api/community/[id]/comments`
+
+댓글 작성. **인증 필요.**
+
+**요청 바디**
+```json
+{ "content": "댓글 내용 (1자 이상)" }
+```
+
+**응답**
+- `201` `{ "data": <Comment> }`
+- `400` 검증 실패
+- `401` 미인증
+
+---
+
 ## 확인 완료 (로컬)
 
 - `GET /api/recruit` → 200, `?stack=` 필터 동작 확인

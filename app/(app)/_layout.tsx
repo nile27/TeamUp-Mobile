@@ -34,6 +34,14 @@ export default function AppLayout() {
       />
       <Tabs.Screen name="recruit/[id]" options={{ href: null, title: "모집 상세" }} />
       <Tabs.Screen
+        name="community/index"
+        options={{
+          title: "커뮤니티",
+          tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles-outline" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen name="community/[id]" options={{ href: null, title: "커뮤니티 글" }} />
+      <Tabs.Screen
         name="dashboard"
         options={{
           title: "마이페이지",
