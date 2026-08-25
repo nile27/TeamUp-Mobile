@@ -121,8 +121,10 @@ export default function CommunityDetailScreen() {
           />
           <Pressable
             onPress={handleComment}
-            disabled={commentMutation.isPending}
-            className="rounded-lg bg-amber px-4 py-2 disabled:opacity-50"
+            disabled={session ? commentMutation.isPending || !commentText.trim() : false}
+            className={`rounded-lg px-4 py-2 ${
+              session && (commentMutation.isPending || !commentText.trim()) ? "bg-gray-200" : "bg-amber"
+            }`}
           >
             <Text className="font-semibold text-ink">{session ? "등록" : "로그인"}</Text>
           </Pressable>
