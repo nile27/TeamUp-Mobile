@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  RefreshControl,
   Text,
   TextInput,
   View,
@@ -20,11 +21,15 @@ import { COLORS } from "@/config/theme";
 export default function CommunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useSession();
-  const { data: post, isLoading, isError, refetch } = useCommunityDetail(id);
+  const { data: post, isLoading, isError, refetch, isRefetching } = useCommunityDetail(id);
   const likeMutation = useToggleCommunityLike(id);
   const commentMutation = useAddCommunityComment(id);
   const [commentText, setCommentText] = useState("");
   const [commentError, setCommentError] = useState<string | null>(null);
+  // isPending은 mutate() 호출 후 리렌더가 반영돼야 true가 되는데, 연속 탭이 그 리렌더
+  // 사이에 다 들어오면 매번 새 toggle 요청이 겹쳐 나가서 최종 상태가 꼬였음(연타 버그) —
+  // 리렌더를 기다리지 않는 ref로 동기 가드.
+  const isLikeMutatingRef = useRef(false);
 
   if (isLoading) {
     return (
@@ -50,7 +55,13 @@ export default function CommunityDetailScreen() {
       router.push("/(auth)/login");
       return;
     }
-    likeMutation.mutate();
+    if (isLikeMutatingRef.current) return;
+    isLikeMutatingRef.current = true;
+    likeMutation.mutate(undefined, {
+      onSettled: () => {
+        isLikeMutatingRef.current = false;
+      },
+    });
   };
 
   const handleComment = () => {
@@ -78,6 +89,7 @@ export default function CommunityDetailScreen() {
         data={post.comments}
         keyExtractor={(item) => item.id}
         contentContainerClassName="gap-3 p-4"
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
         ListHeaderComponent={
           <View className="mb-4 gap-3">
             <Text className="text-xs font-medium text-amber-deep">{COMMUNITY_TAG_LABEL[post.tag]}</Text>
