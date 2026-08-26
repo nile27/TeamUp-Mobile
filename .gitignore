@@ -41,3 +41,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# 로컬 전용 테스트 진행 상황 기록 (개인용, git에 안 올림)
+docs/testing/3차_웹앱_통합테스트_체크리스트.md
