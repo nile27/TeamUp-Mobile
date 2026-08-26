@@ -67,18 +67,21 @@ export default function DashboardScreen() {
         <Text className="text-ink-soft">아직 지원한 모집이 없어요.</Text>
       ) : (
         <FlatList
+          className="flex-1"
           data={data.myApplications}
           keyExtractor={(item) => item.id}
           contentContainerClassName="gap-2"
           renderItem={({ item }) => (
             <Pressable
               onPress={() => router.push(`/(app)/recruit/${item.recruit.id}`)}
-              className="flex-row items-center justify-between rounded-lg border border-gray-100 px-3 py-3"
+              className="flex-row items-center gap-2 rounded-lg border border-gray-100 px-3 py-3"
             >
               <Text className="flex-1 text-ink" numberOfLines={1}>
                 {item.recruit.title}
               </Text>
-              <Text className="text-xs text-ink-soft">{APPLICATION_STATUS_LABEL[item.status]}</Text>
+              <View className="shrink-0 rounded-full bg-gray-100 px-2 py-1">
+                <Text className="text-xs text-ink-soft">{APPLICATION_STATUS_LABEL[item.status]}</Text>
+              </View>
             </Pressable>
           )}
         />
