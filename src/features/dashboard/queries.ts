@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useFocusEffect } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchDashboard } from "./api";
@@ -25,11 +25,16 @@ export function useDashboard(enabled: boolean) {
     }, [enabled])
   );
 
+  // recruit-list와 같은 이유(Supabase Realtime 채널명 충돌 크래시 방지)로,
+  // 사용자 id만으로는 같은 사용자의 훅 인스턴스가 여러 개 떠있을 때 겹칠 수 있어
+  // 인스턴스별 고유 접미사를 덧붙임.
+  const channelSuffix = useRef(Math.random().toString(36).slice(2)).current;
+
   useEffect(() => {
     if (!enabled || !session) return;
 
     const channel = supabase
-      .channel(`applications-${session.user.id}`)
+      .channel(`applications-${session.user.id}-${channelSuffix}`)
       .on(
         "postgres_changes",
         {
