@@ -23,6 +23,10 @@ export default function AppLayout() {
         headerTintColor: COLORS.ink,
         tabBarActiveTintColor: COLORS.amber,
         tabBarInactiveTintColor: COLORS.inkSoft,
+        // 탭 화면(커뮤니티 상세 등) 안에 있는 입력창이 키보드에 가려지는 문제 —
+        // 하단 탭 바가 항상 떠있는 상태로 리사이즈 계산에 끼어드는 게 원인이었음.
+        // 키보드 뜨면 탭 바 자체를 숨겨서 공간을 온전히 확보.
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
