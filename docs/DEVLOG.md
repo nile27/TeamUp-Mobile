@@ -4,6 +4,53 @@
 
 ---
 
+## 2026-08-27 (6) — 모집 기술 스택을 가로 캐러셀로 변경
+
+모집 목록 카드·상세 화면의 기술 스택 칩을 `flex-wrap`(줄바꿈) 방식에서 가로 스크롤 캐러셀(`ScrollView horizontal`)로 변경. 상세 화면은 그동안 `techStack` 전체를 줄바꿈으로 다 보여줬던 것도 캐러셀로 통일, 목록 카드는 기존에 4개까지만 자르던 것(`slice(0, 4)`)을 없애고 스크롤로 전부 볼 수 있게 함. 상세 화면엔 "기술 스택" 라벨도 추가(이전엔 라벨 없이 칩만 떠 있었음).
+
+**추가 반영**: 사용자가 말한 "스킬 캐러셀"이 실은 모집 목록 상단의 **기술스택 필터 칩**(`FILTER_CHIPS`) 쪽이었음 — 이것도 `flex-wrap` → 가로 캐러셀로 변경하고, 8개로 자르던 것(`TECH_STACK_OPTIONS.slice(0, 8)`)도 없애 전체 옵션을 스크롤로 노출.
+
+**UX 피드백 — 캐러셀인 게 티가 안 남**: 그냥 가로 `ScrollView`만 쓰면 실제로 스크롤은 되는데 "더 있다"는 시각적 힌트가 전혀 없어서 캐러셀인지 구분이 안 된다는 피드백. `src/components/horizontal-carousel.tsx` 신설 — 양쪽 끝에 배경색 페이드 + 화살표 아이콘(`chevron-back`/`chevron-forward`, 누르는 버튼 아니라 힌트용)을 얹은 재사용 컴포넌트. 필터 칩·모집 카드/상세의 기술 스택 캐러셀 3곳 전부 이걸로 교체. 필터 칩 위에는 "기술 스택으로 필터링" 소제목도 추가(원래 무슨 용도인지 설명이 없었음).
+
+**시행착오 — `expo-linear-gradient`는 네이티브 모듈이라 Metro 리로드로 안 붙음**: 처음엔 `expo-linear-gradient`로 진짜 그라디언트를 만들었는데, 실기기에서 리로드하니 `Can't find ViewManager 'ViewManagerAdapter_ExpoLinearGradient'` 크래시 — 네이티브 코드가 필요한 패키지라 지금 설치된 dev-client APK엔 없어서 EAS로 새로 빌드해야만 반영되는 걸 놓쳤음. dev-client 재빌드 없이 바로 되게 하려고 패키지를 제거하고, 반투명 `View`를 여러 겹 겹쳐서(4단계 opacity) 그라디언트처럼 보이게 하는 순수 JS/스타일 방식으로 교체 — 네이티브 모듈 추가 없이 Metro 리로드만으로 반영됨.
+
+**스크린샷 피드백 — 화살표가 칩 텍스트에 겹침**: 실기기 스크린샷 확인해보니 좌우 화살표 아이콘이 첫/마지막 칩 글자 위에 그대로 겹쳐서 "React"/"JavaScript" 글자가 가려 보임. 필터 칩 캐러셀을 별도 컴포넌트(`src/components/filter-carousel.tsx`)로 분리 — 화살표를 칩 행 위쪽 헤더 줄로 옮기고(라벨과 같은 줄, 오른쪽 정렬), 장식이 아니라 실제로 `scrollTo()`를 호출해 스크롤을 이동시키는 버튼으로 만듦. 전체를 `bg-gray-50 rounded-2xl p-4` 박스로 감싸서 하나의 컴포넌트처럼 보이게 하고, 칩 자체는 박스 배경과 구분되도록 흰 배경으로. 라벨 문구도 "기술 스택으로 필터링"(동사형) → "기술 스택"(간결한 소제목)으로 변경. `HorizontalCarousel`(모집 카드/상세의 작은 인라인 캐러셀용)은 화살표 없이 페이드만 남기는 걸로 단순화 — 좁은 카드 안에서는 헤더 줄을 따로 두기 애매해서.
+
+**피드백 — 박스가 티가 안 남**: `bg-gray-50` 박스가 흰 화면 배경과 대비가 약해서 눈에 잘 안 띈다는 피드백. `FilterCarousel` 박스 배경을 `bg-gray-50` → `bg-amber-soft`(브랜드 앰버 톤)로 바꿔서 화면에서 확실히 구분되게 하고, 소제목도 `text-xs` → `text-sm font-semibold`(+ `text-amber-deep` 색)으로 키움. 활성 칩도 박스 배경(amber-soft)과 안 섞이도록 `bg-amber-soft` → 진한 `bg-amber` 채움으로 대비 강화.
+
+**필터 초기화 버튼 추가**: 헤더 줄(라벨 옆)에 선택된 필터가 하나라도 있을 때만 "초기화" 버튼 노출 — 누르면 `stackFilter`를 빈 배열로.
+
+**여전히 아쉽다는 피드백 — `redesign-existing-projects` 스킬로 이 컴포넌트만 다시 감사**: 칩·네비 버튼이 flat이라 깊이감이 없고(스킬의 "generic box-shadow 없음/flat with zero texture" 항목), 눌러도 피드백이 없던 것(스킬의 "No active/pressed feedback" 항목) 두 가지를 짚어서 재작업.
+- 칩·네비 버튼·초기화 버튼에 배경 hue(amber)에 맞춘 **색조 그림자**(`shadow-amber-deep/10~30`, 스킬이 권장하는 "순수 검정 대신 배경 hue를 tint한 그림자") 추가 — 활성 칩은 진하게(`/30`), 비활성 칩은 옅게(`/10`)로 깊이 차등.
+- 모든 `Pressable`에 `active:opacity-70` 추가 — 눌렀을 때 반응이 생기도록.
+- 초기화·이전·다음 버튼을 같은 크기(`h-7`)·같은 흰 배경·같은 그림자로 통일해서 "네비게이션 컨트롤 그룹"처럼 보이게 정리, 라벨 앞엔 작은 점(dot) 추가.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과. 생성된 CSS에서 `shadow-amber-deep/10~30`도 정상 컴파일 확인.
+
+---
+
+## 2026-08-27 (5) — `redesign-existing-projects` 스킬로 디자인 리팩토링
+
+**배경**: 웹 UI가 "2010년대스럽다"는 피드백으로 `taste-skill`의 `redesign-existing-projects` 스킬을 웹에 적용해 효과를 봤고, 같은 스킬을 모바일에도 적용. 스킬 자체는 웹 CSS 기준이라 RN 방식으로 해석해서 적용(`npx skills add https://github.com/Leonxlnx/taste-skill --skill "redesign-existing-projects"`로 설치, `.agents/skills/redesign-existing-projects/SKILL.md`).
+
+**진행 순서**: 감사(audit) 결과를 먼저 사용자에게 보여주고 확인받은 후 진행(스킬이 요구하는 절차). **기능 로직은 전혀 안 건드리고 스타일 레이어만 수정.**
+
+**적용한 것**
+1. **타이포 헤드라인 존재감**: 로그인/회원가입/마이페이지/모집·커뮤니티 상세 제목을 `text-2xl~xl font-bold` → `text-2xl~3xl font-extrabold tracking-tight`로. 한글 폰트 파일 번들링(Pretendard 등)은 비용 대비 효과가 낮다고 판단해 스킵, 사이즈/굵기 축으로만 처리.
+2. **"테두리+흰배경" 제네릭 카드 탈피 + 색 앵커**: 웹의 `avatar-tone.ts`(닉네임 해시 → 3톤 순환) 로직을 `src/lib/avatar-tone.ts`로 이식, 이니셜 아바타 컴포넌트(`src/components/avatar.tsx`) 신설. 커뮤니티 목록/상세/댓글에 작성자 아바타 적용. 카드 배경을 `border border-gray-100` → `border-0 bg-gray-50`(옅은 배경 톤만으로 경계 표현)로 전환(모집/커뮤니티 리스트, 마이페이지 3개 섹션, 댓글 아이템).
+   - 모집 리스트/상세는 목록 API에 작성자 정보가 없어서(웹 쿼리 확인) 아바타 대신 모집 타입(DEV/PLAN)별 색 배지(`sky`/`emerald`)로 시각 앵커 대체.
+   - 모집 상세에 원래 화면에 없던 작성자(아바타+닉네임+작성일) 표시 추가 — 데이터는 이미 API에 있었는데 화면에 안 그리고 있었음(웹은 표시하고 있어서 맞춤).
+3. **레이아웃 여백**: 리스트 `gap-3`→`gap-4`, 카드 패딩 `p-4`→`p-5`(리스트)/`px-3 py-3`→`px-4 py-3.5`(마이페이지 행), 상세 화면 섹션 간격도 소폭 확대.
+4. **아이콘 통일**: 커뮤니티 좋아요의 이모지(❤️/🤍)를 `@expo/vector-icons`(Ionicons `heart`/`heart-outline`)로 교체 — 탭 아이콘과 같은 벡터 아이콘 체계로 통일. 댓글 수도 `chatbubble-outline` 아이콘 추가.
+5. **상세 화면 로딩 상태**: 모집/커뮤니티/마이페이지 상세의 원형 스피너(`ActivityIndicator`)를 실제 레이아웃 모양을 닮은 스켈레톤(회색 블록)으로 교체 — 목록 화면은 원래도 스켈레톤이라 통일.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 둘 다 통과. 생성된 CSS에서 새로 쓴 `bg-sky-100`/`bg-emerald-100` 등도 정상 컴파일 확인.
+
+**다음 할 일**:
+- [ ] 실기기에서 스크린별 확인 — 특히 카드 배경 톤 변화, 아바타 색상, 헤드라인 크기가 의도대로 보이는지.
+
+---
+
 ## 2026-08-27 (4) — 모집글/커뮤니티글 삭제 기능 추가
 
 **배경**: 웹에 작성자 본인 삭제 기능(`DELETE /api/recruit/[id]`, `DELETE /api/community/[id]`)이 새로 생겨서, 모바일에도 동일하게 붙임.
