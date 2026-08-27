@@ -1,14 +1,25 @@
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
+import { Avatar } from "@/components/avatar";
+import { HorizontalCarousel } from "@/components/horizontal-carousel";
 import { useSession } from "@/features/auth/use-session";
 import { useRecruitDetail } from "@/features/recruit/queries";
 import { useApplyToRecruit, useDeleteRecruit } from "@/features/recruit/mutations";
 import { RECRUIT_TYPE_LABEL } from "@/config/labels";
 import { ApiError } from "@/lib/api-client";
-import { COLORS } from "@/config/theme";
+
+const RECRUIT_TYPE_BADGE: Record<"DEV" | "PLAN", string> = {
+  DEV: "bg-sky-100",
+  PLAN: "bg-emerald-100",
+};
+
+const RECRUIT_TYPE_BADGE_TEXT: Record<"DEV" | "PLAN", string> = {
+  DEV: "text-sky-700",
+  PLAN: "text-emerald-700",
+};
 
 export default function RecruitDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -21,8 +32,12 @@ export default function RecruitDetailScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator color={COLORS.amber} />
+      <View className="flex-1 gap-4 bg-white p-4">
+        <View className="h-6 w-20 rounded-md bg-gray-100" />
+        <View className="h-8 w-3/4 rounded-md bg-gray-100" />
+        <View className="h-4 w-1/2 rounded-md bg-gray-100" />
+        <View className="h-24 w-full rounded-xl bg-gray-100" />
+        <View className="h-24 w-full rounded-xl bg-gray-100" />
       </View>
     );
   }
@@ -75,11 +90,15 @@ export default function RecruitDetailScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView contentContainerClassName="p-4 pb-24 gap-4">
+      <ScrollView contentContainerClassName="p-4 pb-24 gap-5">
         <View className="flex-row items-start justify-between">
-          <View className="flex-1 gap-1">
-            <Text className="text-xs font-medium text-amber-deep">{RECRUIT_TYPE_LABEL[recruit.type]}</Text>
-            <Text className="text-xl font-bold text-ink">{recruit.title}</Text>
+          <View className="flex-1 gap-2">
+            <View className={`self-start rounded-md px-2 py-1 ${RECRUIT_TYPE_BADGE[recruit.type]}`}>
+              <Text className={`text-xs font-semibold ${RECRUIT_TYPE_BADGE_TEXT[recruit.type]}`}>
+                {RECRUIT_TYPE_LABEL[recruit.type]}
+              </Text>
+            </View>
+            <Text className="text-2xl font-extrabold tracking-tight text-ink">{recruit.title}</Text>
           </View>
           {isAuthor && (
             <Button
@@ -94,6 +113,15 @@ export default function RecruitDetailScreen() {
         </View>
         {deleteError && <Text className="text-sm text-red-500">{deleteError}</Text>}
 
+        {recruit.author && (
+          <View className="flex-row items-center gap-2">
+            <Avatar name={recruit.author.nickname} size={28} />
+            <Text className="text-sm text-ink-soft">
+              {recruit.author.nickname} · {new Date(recruit.createdAt).toLocaleDateString("ko-KR")}
+            </Text>
+          </View>
+        )}
+
         <View className="gap-1">
           <Text className="text-sm text-ink-soft">기획 완성도</Text>
           <View className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
@@ -106,12 +134,15 @@ export default function RecruitDetailScreen() {
 
         <Text className="leading-6 text-ink">{recruit.content}</Text>
 
-        <View className="flex-row flex-wrap gap-1">
-          {recruit.techStack.map((stack) => (
-            <View key={stack} className="rounded-full bg-amber-soft px-2 py-0.5">
-              <Text className="text-xs text-ink">{stack}</Text>
-            </View>
-          ))}
+        <View className="gap-2">
+          <Text className="text-sm font-semibold text-ink">기술 스택</Text>
+          <HorizontalCarousel contentContainerClassName="gap-1.5 pr-4">
+            {recruit.techStack.map((stack) => (
+              <View key={stack} className="rounded-full bg-amber-soft px-3 py-1.5">
+                <Text className="text-xs text-ink">{stack}</Text>
+              </View>
+            ))}
+          </HorizontalCarousel>
         </View>
 
         <View className="gap-2">
