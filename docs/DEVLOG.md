@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-08-27 (3) — 좋아요 취소 등 DELETE Realtime 이벤트 누락 — 확인만, 코드 수정 없음
+
+**신고된 증상**: 웹에서 좋아요 취소하면 모바일에 반영 안 됨(좋아요 누르는 건 정상 반영).
+
+**원인(웹 쪽에서 이미 확정·수정)**: `CommunityPostLike`/`Comment`/`Recruit`/`Application` 테이블의 `REPLICA IDENTITY`가 기본값(PK만)이라, DELETE 이벤트의 `old record`에 PK 외 컬럼(`postId` 등)이 안 들어옴. `useCommunityDetail`의 구독 필터(`postId=eq.<id>`)가 그 값을 요구하는데 없으니 Realtime 서버가 필터 매칭 자체를 못 해서 이벤트가 클라이언트까지 안 왔던 것. 웹이 4개 테이블 전부 `REPLICA IDENTITY FULL`로 변경 완료(Supabase에서 `relreplident = 'f'` 직접 확인).
+
+**모바일 쪽 검토 결과 — 코드 수정 불필요**:
+- `useCommunityDetail`(좋아요/댓글): 필터가 요구하던 값이 이제 채워지므로 DB 수정만으로 저절로 해결됨.
+- `useRecruitList`(모집 목록): 애초에 필터 없이 전체 이벤트 구독이라 REPLICA IDENTITY와 무관하게 삭제도 원래 정상 반영되고 있었음.
+- `useDashboard`: `Application`은 `UPDATE`만 구독(삭제 기능 자체가 없어서 DELETE는 처리 대상 아님).
+- 콜백이 전부 `payload` 내용을 안 읽고 무조건 `invalidateQueries`만 하는 구조라, 우회 로직 같은 것도 원래 없었음(단순화할 것도 없음).
+
+**발견한 별개 이슈 — 의도적으로 안 고치기로 결정**: 커뮤니티 **목록** 화면(`useCommunityList`)엔 Realtime 구독이 아예 없어서 새 글은 pull-to-refresh해야 반영됨. 웹도 이 부분은 실시간이 아니고, "목록에 새 글이 몰래 끼어드는" 것보다 pull-to-refresh가 표준적인 패턴이라는 데 사용자와 합의 — 추가 안 하기로 함.
+
+---
+
 ## 2026-08-27 — React Native Reusables(shadcn RN 포트) 도입
 
 **배경**: 지금까지 화면들이 디자인 시스템 없이 NativeWind 클래스로 그때그때 스타일링돼서 화면마다 통일감이 떨어진다는 지적 — 원래 `AGENTS.md`/`rn-pilot-plan.md`에 계획돼 있던 React Native Reusables를 착수 안 하고 있던 상태였음. 이번에 정식 도입.
