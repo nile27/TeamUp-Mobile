@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { router } from "expo-router";
 import { FlatList, Pressable, RefreshControl, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Avatar } from "@/components/avatar";
 import { useCommunityList } from "@/features/community/queries";
 import { COMMUNITY_TAG_FILTERS, COMMUNITY_TAG_LABEL } from "@/config/labels";
+import { COLORS } from "@/config/theme";
 import type { CommunityPost, CommunityTag } from "@/features/community/types";
 
 export default function CommunityListScreen() {
@@ -60,7 +63,7 @@ export default function CommunityListScreen() {
         <FlatList
           data={data.posts}
           keyExtractor={(item) => item.id}
-          contentContainerClassName="gap-3 p-4"
+          contentContainerClassName="gap-4 p-4"
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
           renderItem={({ item }) => <CommunityCard post={item} />}
         />
@@ -72,18 +75,31 @@ export default function CommunityListScreen() {
 function CommunityCard({ post }: { post: CommunityPost }) {
   return (
     <Pressable onPress={() => router.push(`/(app)/community/${post.id}`)}>
-      <Card className="gap-0 rounded-xl border border-gray-100 p-4 shadow-none">
-        <Text className="mb-1 text-xs font-medium text-amber-deep">{COMMUNITY_TAG_LABEL[post.tag]}</Text>
-        <Text className="mb-1 text-base font-semibold text-ink" numberOfLines={1}>
-          {post.title}
-        </Text>
-        <Text className="mb-2 text-sm text-ink-soft" numberOfLines={2}>
-          {post.content}
-        </Text>
-        <View className="flex-row gap-3">
-          <Text className="text-xs text-ink-soft">{post.author.nickname}</Text>
-          <Text className="text-xs text-ink-soft">❤️ {post._count.likes}</Text>
-          <Text className="text-xs text-ink-soft">댓글 {post._count.comments}</Text>
+      <Card className="flex-row gap-3 rounded-2xl border-0 bg-gray-50 p-5 shadow-none">
+        <Avatar name={post.author.nickname} />
+        <View className="flex-1 gap-2">
+          <View className="self-start rounded-md bg-amber-soft px-2 py-1">
+            <Text className="text-xs font-semibold text-amber-deep">
+              {COMMUNITY_TAG_LABEL[post.tag]}
+            </Text>
+          </View>
+          <Text className="text-base font-semibold text-ink" numberOfLines={1}>
+            {post.title}
+          </Text>
+          <Text className="text-sm text-ink-soft" numberOfLines={2}>
+            {post.content}
+          </Text>
+          <View className="flex-row items-center gap-3">
+            <Text className="text-xs text-ink-soft">{post.author.nickname}</Text>
+            <View className="flex-row items-center gap-1">
+              <Ionicons name="heart" size={12} color={COLORS.amberDeep} />
+              <Text className="text-xs text-ink-soft">{post._count.likes}</Text>
+            </View>
+            <View className="flex-row items-center gap-1">
+              <Ionicons name="chatbubble-outline" size={12} color={COLORS.inkSoft} />
+              <Text className="text-xs text-ink-soft">{post._count.comments}</Text>
+            </View>
+          </View>
         </View>
       </Card>
     </Pressable>

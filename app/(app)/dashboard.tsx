@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from "react-native";
+import { Alert, Pressable, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,6 @@ import { useDeleteRecruit } from "@/features/recruit/mutations";
 import { useDeleteCommunityPost } from "@/features/community/mutations";
 import { supabase } from "@/server/supabase";
 import { ApiError } from "@/lib/api-client";
-import { COLORS } from "@/config/theme";
 
 const APPLICATION_STATUS_LABEL: Record<string, string> = {
   PENDING: "대기 중",
@@ -64,8 +63,11 @@ export default function DashboardScreen() {
 
   if (isSessionLoading || (session && isLoading)) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator color={COLORS.amber} />
+      <View className="flex-1 gap-4 bg-white p-4">
+        <View className="h-8 w-32 rounded-md bg-gray-100" />
+        <View className="h-16 w-full rounded-xl bg-gray-100" />
+        <View className="h-16 w-full rounded-xl bg-gray-100" />
+        <View className="h-16 w-full rounded-xl bg-gray-100" />
       </View>
     );
   }
@@ -98,7 +100,9 @@ export default function DashboardScreen() {
   return (
     <ScrollView className="flex-1 bg-white" contentContainerClassName="p-4 gap-6">
       <View className="flex-row items-center justify-between">
-        <Text className="text-lg font-bold text-ink">{data.profile?.nickname ?? "마이페이지"}</Text>
+        <Text className="text-2xl font-extrabold tracking-tight text-ink">
+          {data.profile?.nickname ?? "마이페이지"}
+        </Text>
         <Pressable onPress={handleLogout}>
           <Text className="text-sm text-ink-soft">로그아웃</Text>
         </Pressable>
@@ -113,7 +117,7 @@ export default function DashboardScreen() {
             {data.myRecruits.map((item) => (
               <Card
                 key={item.id}
-                className="flex-row items-center gap-2 rounded-lg border border-gray-100 px-3 py-3 shadow-none"
+                className="flex-row items-center gap-3 rounded-xl border-0 bg-gray-50 px-4 py-3.5 shadow-none"
               >
                 <Pressable
                   className="flex-1"
@@ -146,7 +150,7 @@ export default function DashboardScreen() {
             {data.myPosts.map((item) => (
               <Card
                 key={item.id}
-                className="flex-row items-center gap-2 rounded-lg border border-gray-100 px-3 py-3 shadow-none"
+                className="flex-row items-center gap-3 rounded-xl border-0 bg-gray-50 px-4 py-3.5 shadow-none"
               >
                 <Pressable
                   className="flex-1"
@@ -178,7 +182,7 @@ export default function DashboardScreen() {
           <View className="gap-2">
             {data.myApplications.map((item) => (
               <Pressable key={item.id} onPress={() => router.push(`/(app)/recruit/${item.recruit.id}`)}>
-                <Card className="flex-row items-center gap-2 rounded-lg border border-gray-100 px-3 py-3 shadow-none">
+                <Card className="flex-row items-center gap-3 rounded-xl border-0 bg-gray-50 px-4 py-3.5 shadow-none">
                   <Text className="flex-1 text-ink" numberOfLines={1}>
                     {item.recruit.title}
                   </Text>

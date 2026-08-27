@@ -1,18 +1,12 @@
 import { useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  RefreshControl,
-  View,
-} from "react-native";
+import { Alert, FlatList, KeyboardAvoidingView, Platform, RefreshControl, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Avatar } from "@/components/avatar";
 import { useSession } from "@/features/auth/use-session";
 import { useCommunityDetail } from "@/features/community/queries";
 import {
@@ -41,8 +35,11 @@ export default function CommunityDetailScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator color={COLORS.amber} />
+      <View className="flex-1 gap-4 bg-white p-4">
+        <View className="h-6 w-20 rounded-md bg-gray-100" />
+        <View className="h-8 w-3/4 rounded-md bg-gray-100" />
+        <View className="h-4 w-1/2 rounded-md bg-gray-100" />
+        <View className="h-16 w-full rounded-xl bg-gray-100" />
       </View>
     );
   }
@@ -117,14 +114,18 @@ export default function CommunityDetailScreen() {
         className="flex-1"
         data={post.comments}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="gap-3 p-4"
+        contentContainerClassName="gap-4 p-4"
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
         ListHeaderComponent={
-          <View className="mb-4 gap-3">
+          <View className="mb-4 gap-4">
             <View className="flex-row items-start justify-between">
-              <View className="flex-1 gap-1">
-                <Text className="text-xs font-medium text-amber-deep">{COMMUNITY_TAG_LABEL[post.tag]}</Text>
-                <Text className="text-xl font-bold text-ink">{post.title}</Text>
+              <View className="flex-1 gap-2">
+                <View className="self-start rounded-md bg-amber-soft px-2 py-1">
+                  <Text className="text-xs font-semibold text-amber-deep">
+                    {COMMUNITY_TAG_LABEL[post.tag]}
+                  </Text>
+                </View>
+                <Text className="text-2xl font-extrabold tracking-tight text-ink">{post.title}</Text>
               </View>
               {isAuthor && (
                 <Button
@@ -138,7 +139,10 @@ export default function CommunityDetailScreen() {
               )}
             </View>
             {deleteError && <Text className="text-sm text-red-500">{deleteError}</Text>}
-            <Text className="text-xs text-ink-soft">{post.author.nickname}</Text>
+            <View className="flex-row items-center gap-2">
+              <Avatar name={post.author.nickname} size={28} />
+              <Text className="text-sm text-ink-soft">{post.author.nickname}</Text>
+            </View>
             <Text className="leading-6 text-ink">{post.content}</Text>
 
             <Button
@@ -149,7 +153,11 @@ export default function CommunityDetailScreen() {
                 post.alreadyLiked ? "border-amber bg-amber-soft" : "border-gray-300"
               }`}
             >
-              <Text className="text-base">{post.alreadyLiked ? "❤️" : "🤍"}</Text>
+              <Ionicons
+                name={post.alreadyLiked ? "heart" : "heart-outline"}
+                size={16}
+                color={post.alreadyLiked ? COLORS.amberDeep : COLORS.inkSoft}
+              />
               <Text className={post.alreadyLiked ? "font-semibold text-ink" : "text-ink-soft"}>
                 {post._count.likes}
               </Text>
@@ -160,9 +168,12 @@ export default function CommunityDetailScreen() {
         }
         ListEmptyComponent={<Text className="text-ink-soft">아직 댓글이 없어요.</Text>}
         renderItem={({ item }) => (
-          <Card className="gap-0 rounded-lg border-0 bg-gray-50 p-3 shadow-none">
-            <Text className="mb-1 text-xs text-ink-soft">{item.author.nickname}</Text>
-            <Text className="text-ink">{item.content}</Text>
+          <Card className="flex-row gap-3 rounded-lg border-0 bg-gray-50 p-3 shadow-none">
+            <Avatar name={item.author.nickname} size={24} />
+            <View className="flex-1 gap-1">
+              <Text className="text-xs text-ink-soft">{item.author.nickname}</Text>
+              <Text className="text-ink">{item.content}</Text>
+            </View>
           </Card>
         )}
       />

@@ -57,7 +57,7 @@ export default function SignupScreen() {
         contentContainerClassName="flex-grow justify-center px-6"
         keyboardShouldPersistTaps="handled"
       >
-        <Text className="mb-8 text-2xl font-bold text-ink">회원가입</Text>
+        <Text className="mb-8 text-3xl font-extrabold tracking-tight text-ink">회원가입</Text>
 
         <Text className="mb-1 text-sm text-ink">닉네임</Text>
         <Controller
