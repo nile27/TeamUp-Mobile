@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
 import { useSession } from "@/features/auth/use-session";
 import { useRecruitDetail } from "@/features/recruit/queries";
 import { useApplyToRecruit } from "@/features/recruit/mutations";
@@ -27,9 +29,9 @@ export default function RecruitDetailScreen() {
     return (
       <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
         <Text className="text-ink-soft">모집 정보를 불러오지 못했어요.</Text>
-        <Pressable onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2">
+        <Button onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2 shadow-none">
           <Text className="font-semibold text-ink">다시 시도</Text>
-        </Pressable>
+        </Button>
       </View>
     );
   }
@@ -88,10 +90,10 @@ export default function RecruitDetailScreen() {
 
       <View className="absolute bottom-0 left-0 right-0 border-t border-gray-100 bg-white p-4">
         {applyError && <Text className="mb-2 text-sm text-red-500">{applyError}</Text>}
-        <Pressable
+        <Button
           onPress={handleApply}
           disabled={applied || applyMutation.isPending}
-          className="items-center rounded-lg bg-amber py-3 disabled:opacity-50"
+          className="items-center rounded-lg bg-amber py-3 shadow-none disabled:opacity-50"
         >
           <Text className="font-semibold text-ink">
             {applied
@@ -102,7 +104,7 @@ export default function RecruitDetailScreen() {
                   ? "지원하기"
                   : "로그인하고 지원하기"}
           </Text>
-        </Pressable>
+        </Button>
       </View>
     </View>
   );

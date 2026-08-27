@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { router } from "expo-router";
-import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, View } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useRecruitList } from "@/features/recruit/queries";
 import { TECH_STACK_OPTIONS } from "@/config/tech-stack";
 import { RECRUIT_TYPE_LABEL } from "@/config/labels";
@@ -50,9 +53,9 @@ export default function RecruitListScreen() {
       {isError && !isLoading && (
         <View className="flex-1 items-center justify-center gap-3 px-6">
           <Text className="text-ink-soft">목록을 불러오지 못했어요.</Text>
-          <Pressable onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2">
+          <Button onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2 shadow-none">
             <Text className="font-semibold text-ink">다시 시도</Text>
-          </Pressable>
+          </Button>
         </View>
       )}
 
@@ -77,26 +80,25 @@ export default function RecruitListScreen() {
 
 function RecruitCard({ recruit }: { recruit: Recruit }) {
   return (
-    <Pressable
-      onPress={() => router.push(`/(app)/recruit/${recruit.id}`)}
-      className="rounded-xl border border-gray-100 p-4"
-    >
-      <Text className="mb-1 text-xs font-medium text-amber-deep">
-        {RECRUIT_TYPE_LABEL[recruit.type]}
-      </Text>
-      <Text className="mb-1 text-base font-semibold text-ink" numberOfLines={1}>
-        {recruit.title}
-      </Text>
-      <Text className="mb-2 text-sm text-ink-soft" numberOfLines={2}>
-        {recruit.content}
-      </Text>
-      <View className="flex-row flex-wrap gap-1">
-        {recruit.techStack.slice(0, 4).map((stack) => (
-          <View key={stack} className="rounded-full bg-amber-soft px-2 py-0.5">
-            <Text className="text-xs text-ink">{stack}</Text>
-          </View>
-        ))}
-      </View>
+    <Pressable onPress={() => router.push(`/(app)/recruit/${recruit.id}`)}>
+      <Card className="gap-0 rounded-xl border border-gray-100 p-4 shadow-none">
+        <Text className="mb-1 text-xs font-medium text-amber-deep">
+          {RECRUIT_TYPE_LABEL[recruit.type]}
+        </Text>
+        <Text className="mb-1 text-base font-semibold text-ink" numberOfLines={1}>
+          {recruit.title}
+        </Text>
+        <Text className="mb-2 text-sm text-ink-soft" numberOfLines={2}>
+          {recruit.content}
+        </Text>
+        <View className="flex-row flex-wrap gap-1">
+          {recruit.techStack.slice(0, 4).map((stack) => (
+            <View key={stack} className="rounded-full bg-amber-soft px-2 py-0.5">
+              <Text className="text-xs text-ink">{stack}</Text>
+            </View>
+          ))}
+        </View>
+      </Card>
     </Pressable>
   );
 }

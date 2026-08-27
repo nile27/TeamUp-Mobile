@@ -5,12 +5,13 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   RefreshControl,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { useSession } from "@/features/auth/use-session";
 import { useCommunityDetail } from "@/features/community/queries";
 import { useAddCommunityComment, useToggleCommunityLike } from "@/features/community/mutations";
@@ -43,9 +44,9 @@ export default function CommunityDetailScreen() {
     return (
       <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
         <Text className="text-ink-soft">글을 불러오지 못했어요.</Text>
-        <Pressable onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2">
+        <Button onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2 shadow-none">
           <Text className="font-semibold text-ink">다시 시도</Text>
-        </Pressable>
+        </Button>
       </View>
     );
   }
@@ -97,10 +98,11 @@ export default function CommunityDetailScreen() {
             <Text className="text-xs text-ink-soft">{post.author.nickname}</Text>
             <Text className="leading-6 text-ink">{post.content}</Text>
 
-            <Pressable
+            <Button
+              variant="ghost"
               onPress={handleLike}
               disabled={likeMutation.isPending}
-              className={`flex-row items-center gap-1.5 self-start rounded-full border px-4 py-2 ${
+              className={`flex-row items-center gap-1.5 self-start rounded-full border px-4 py-2 shadow-none ${
                 post.alreadyLiked ? "border-amber bg-amber-soft" : "border-gray-300"
               }`}
             >
@@ -108,38 +110,38 @@ export default function CommunityDetailScreen() {
               <Text className={post.alreadyLiked ? "font-semibold text-ink" : "text-ink-soft"}>
                 {post._count.likes}
               </Text>
-            </Pressable>
+            </Button>
 
             <Text className="mt-2 text-sm font-semibold text-ink">댓글 {post._count.comments}</Text>
           </View>
         }
         ListEmptyComponent={<Text className="text-ink-soft">아직 댓글이 없어요.</Text>}
         renderItem={({ item }) => (
-          <View className="rounded-lg bg-gray-50 p-3">
+          <Card className="gap-0 rounded-lg border-0 bg-gray-50 p-3 shadow-none">
             <Text className="mb-1 text-xs text-ink-soft">{item.author.nickname}</Text>
             <Text className="text-ink">{item.content}</Text>
-          </View>
+          </Card>
         )}
       />
 
       <View className="border-t border-gray-100 bg-white p-4">
         {commentError && <Text className="mb-2 text-sm text-red-500">{commentError}</Text>}
         <View className="flex-row items-center gap-2">
-          <TextInput
+          <Input
             className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-ink"
             placeholder={session ? "댓글을 입력하세요" : "로그인 후 댓글을 남길 수 있어요"}
             value={commentText}
             onChangeText={setCommentText}
           />
-          <Pressable
+          <Button
             onPress={handleComment}
             disabled={session ? commentMutation.isPending || !commentText.trim() : false}
-            className={`rounded-lg px-4 py-2 ${
+            className={`rounded-lg px-4 py-2 shadow-none ${
               session && (commentMutation.isPending || !commentText.trim()) ? "bg-gray-200" : "bg-amber"
             }`}
           >
             <Text className="font-semibold text-ink">{session ? "등록" : "로그인"}</Text>
-          </Pressable>
+          </Button>
         </View>
       </View>
     </KeyboardAvoidingView>

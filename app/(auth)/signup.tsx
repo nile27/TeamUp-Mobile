@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { signupSchema, type SignupInput } from "@/schema/auth";
 import { signupWithPassword } from "@/features/auth/api";
 
@@ -61,7 +64,7 @@ export default function SignupScreen() {
           control={control}
           name="nickname"
           render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
+            <Input
               className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
               placeholder="2~20자"
               onChangeText={(text) => {
@@ -81,7 +84,7 @@ export default function SignupScreen() {
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
+            <Input
               className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
               placeholder="you@example.com"
               autoCapitalize="none"
@@ -103,7 +106,7 @@ export default function SignupScreen() {
           control={control}
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
+            <Input
               className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
               placeholder="영문+숫자+특수문자 8자 이상"
               secureTextEntry
@@ -121,13 +124,13 @@ export default function SignupScreen() {
 
         {serverError && <Text className="mb-3 text-sm text-red-500">{serverError}</Text>}
 
-        <Pressable
-          className="mb-4 items-center rounded-lg bg-amber py-3 disabled:opacity-50"
+        <Button
+          className="mb-4 items-center rounded-lg bg-amber py-3 shadow-none disabled:opacity-50"
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
           <Text className="font-semibold text-ink">{isSubmitting ? "가입 중..." : "회원가입"}</Text>
-        </Pressable>
+        </Button>
 
         <Link href="/(auth)/login" className="text-center text-sm text-ink-soft">
           이미 계정이 있으신가요? 로그인

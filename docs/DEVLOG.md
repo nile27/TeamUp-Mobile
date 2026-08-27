@@ -27,6 +27,22 @@
 
 ---
 
+## 2026-08-27 (2) — 전 화면 컴포넌트 교체 (Button/Text/Input/Card)
+
+**한 것**: "디자인 변화 없이 전부 바꿔달라"는 요청에 따라, 로그인·회원가입·모집(목록/상세)·커뮤니티(목록/상세)·마이페이지 전 화면의 `Pressable`+`RN Text`/`TextInput`을 `src/components/ui/`의 `Button`/`Text`/`Input`/`Card`로 교체. **기존 className은 전부 그대로 유지**하고 태그만 바꿔서 시각적으로는 동일하게 유지(`cn`이 tailwind-merge로 뒤에 오는 className을 우선 적용하므로, 기존 클래스가 항상 새 컴포넌트의 기본 스타일을 덮어씀).
+
+**주의해서 처리한 것 — 컴포넌트 기본 스타일이 몰래 새어나오는 경우**:
+- `Button` 기본 variant는 `bg-primary`(amber) + `shadow-sm shadow-black/5`가 항상 깔림 — 원래 배경이 없던 좋아요 버튼(비활성 상태)엔 `variant="ghost"`로 바꿔서 amber가 새는 것 방지, 그 외 버튼들은 전부 `shadow-none`을 명시적으로 추가해서 없던 그림자가 생기는 것 방지.
+- `Card` 기본 스타일(`flex-col gap-6 py-6 shadow-sm shadow-black/5 border-border`)이 기존 `p-4`/`flex-row` 레이아웃과 충돌해서, 카드로 바꾼 곳(모집/커뮤니티 리스트 카드, 댓글 아이템, 마이페이지 지원 목록 행)마다 `gap-0`(또는 `gap-2`)·`shadow-none`·`border-0`(테두리 없던 곳)를 명시적으로 덮어써서 기존 여백/그림자/테두리 그대로 유지.
+
+**검증**: `npx tsc --noEmit` 통과, `npx expo export --platform web` 에러 없이 번들 성공. 생성된 CSS에서 `shadow-none`/`gap-0` 등 오버라이드 클래스가 의도대로 컴파일된 것도 확인. 실기기 시각 확인은 아직 — Metro 재연결 후 사용자 확인 필요.
+
+**다음 할 일**:
+- [ ] 실기기에서 스크린별로 이전과 똑같이 보이는지 확인(특히 카드 여백·좋아요 버튼·버튼 그림자 유무).
+- [ ] 문제없으면 이제부터 새 화면/기능은 처음부터 `src/components/ui/` 컴포넌트로 작성.
+
+---
+
 ## 2026-08-26 — 3차 통합 테스트 버그 수정 + 속도 원인 규명(웹), 로컬 전용 문서 폴더
 
 **웹+모바일 통합 테스트(3차)에서 나온 버그 수정**

@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
-import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, View } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { loginSchema, type LoginInput } from "@/schema/auth";
 import { loginWithPassword } from "@/features/auth/api";
 import { API_BASE_URL } from "@/config/env";
@@ -55,7 +58,7 @@ export default function LoginScreen() {
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
+            <Input
               className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
               placeholder="you@example.com"
               autoCapitalize="none"
@@ -77,7 +80,7 @@ export default function LoginScreen() {
           control={control}
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
+            <Input
               className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
               placeholder="********"
               secureTextEntry
@@ -95,13 +98,13 @@ export default function LoginScreen() {
 
         {serverError && <Text className="mb-3 text-sm text-red-500">{serverError}</Text>}
 
-        <Pressable
-          className="mb-4 items-center rounded-lg bg-amber py-3 disabled:opacity-50"
+        <Button
+          className="mb-4 items-center rounded-lg bg-amber py-3 shadow-none disabled:opacity-50"
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
           <Text className="font-semibold text-ink">{isSubmitting ? "로그인 중..." : "로그인"}</Text>
-        </Pressable>
+        </Button>
 
         <Link href="/(auth)/signup" className="mb-6 text-center text-sm text-ink-soft">
           아직 계정이 없으신가요? 회원가입
