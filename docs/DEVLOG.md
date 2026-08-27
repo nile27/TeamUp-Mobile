@@ -21,8 +21,18 @@
 **로컬 전용 문서 폴더 신설**: 개인 테스트 기록처럼 git에 안 올려도 되는 문서를 위해 `docs/local/` 폴더 만들고 `.gitignore` 처리. 기존 3차 테스트 체크리스트를 이쪽으로 이동.
 
 **다음 할 일**:
-- [ ] 커뮤니티 좋아요/댓글 Realtime 구현 — 웹 쪽 DB 마이그레이션(CommunityPostLike, Comment 테이블 RLS+publication) 먼저 필요, 그 다음 모바일에서 postgres_changes 구독 추가(`useCommunityDetail`).
 - [ ] 재테스트: 좋아요 연타, 키보드 가림, 마이페이지 UI, 낙관적 업데이트 체감 속도(리전 수정 반영 후).
+
+---
+
+## 2026-08-27 — 커뮤니티 좋아요/댓글 Realtime 반영
+
+웹 쪽에서 `Comment`, `CommunityPostLike` 테이블에 RLS(누구나 SELECT)+`supabase_realtime` publication 등록 마이그레이션 완료(Supabase에서 직접 확인). 모바일 `src/features/community/queries.ts`의 `useCommunityDetail`에 두 테이블 `postgres_changes` 구독 추가(`postId=eq.<id>` 필터) — 다른 사람이 이 글에 좋아요/댓글 남기면 새로고침 없이 바로 반영. 채널명은 어제 겪은 충돌 크래시 방지 패턴대로 인스턴스별 고유값 사용.
+
+`npx tsc --noEmit` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인: 커뮤니티 상세 화면 열어둔 채로 다른 계정(또는 웹)에서 좋아요/댓글 → 자동 반영되는지.
 
 ---
 
