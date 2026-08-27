@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-08-27 — React Native Reusables(shadcn RN 포트) 도입
+
+**배경**: 지금까지 화면들이 디자인 시스템 없이 NativeWind 클래스로 그때그때 스타일링돼서 화면마다 통일감이 떨어진다는 지적 — 원래 `AGENTS.md`/`rn-pilot-plan.md`에 계획돼 있던 React Native Reusables를 착수 안 하고 있던 상태였음. 이번에 정식 도입.
+
+**설치 과정**
+- `@react-native-reusables/cli`(`npx react-native-reusables`가 아니라 이 패키지명)의 `add` 명령으로 `button`, `text`, `card`, `input` 컴포넌트 추가 — `src/components/ui/`에 소스가 그대로 복사되는 방식(shadcn과 동일 철학, npm 라이브러리로 설치되는 게 아님).
+- CLI가 인터랙티브 프롬프트(ink 기반)라 이 세션에서 바로 실행하면 멈춘 것처럼 보임 — `yes y |`로 stdin에 답 흘려보내서 해결.
+- `doctor` 명령으로 누락된 설정 진단 → 전부 수정:
+  - 의존성: `tailwindcss-animate`, `class-variance-authority`, `clsx`, `tailwind-merge`, `@rn-primitives/portal`, `@react-navigation/native` 설치(`npx expo install`).
+  - `src/lib/utils.ts`(`cn` 헬퍼), `src/lib/theme.ts`(`NAV_THEME` + CSS 변수 대응 JS 팔레트) 신규 작성.
+  - `global.css`: shadcn 시맨틱 색 변수(`--primary`, `--background` 등)를 **기존 브랜드 팔레트(amber/ink)에 매핑한 값**으로 추가 — 새 색을 만든 게 아니라 기존 `config/theme.ts` 색을 hsl로 변환해서 그대로 재사용.
+  - `tailwind.config.js`: 위 CSS 변수를 참조하는 `primary`/`secondary`/`muted`/`accent`/`destructive`/`border`/`input`/`ring`/`background`/`foreground`/`card`/`popover` 색상 키 추가, `borderRadius`를 `--radius` 변수 기반으로, `tailwindcss-animate` 플러그인 등록.
+  - `metro.config.js`: `inlineRem: 16` 추가.
+  - `app/_layout.tsx`: `PortalHost` 추가(Dialog/Select 등 포털 렌더링에 필요).
+- `npx @react-native-reusables/cli doctor` 최종 "All checks passed." 확인.
+
+**검증**: `npx tsc --noEmit` 통과, `npx expo export --platform web` 에러 없이 번들 성공.
+
+**다음 할 일**:
+- [ ] 기존 화면(로그인/회원가입/모집/커뮤니티/마이페이지)의 직접 스타일링된 버튼·카드·인풋을 새 `src/components/ui/` 컴포넌트로 교체할지 결정 — 사용자 확인 후 진행.
+
+---
+
 ## 2026-08-26 — 3차 통합 테스트 버그 수정 + 속도 원인 규명(웹), 로컬 전용 문서 폴더
 
 **웹+모바일 통합 테스트(3차)에서 나온 버그 수정**

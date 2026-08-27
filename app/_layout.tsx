@@ -5,6 +5,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { PortalHost } from "@rn-primitives/portal";
 import { queryClient } from "@/lib/query-client";
 import { useSession } from "@/features/auth/use-session";
 import { supabase } from "@/server/supabase";
@@ -41,6 +42,8 @@ export default function RootLayout() {
         {/* 스플래시가 사라진 직후 첫 화면이 그려지기 전 잠깐 검정 화면이 보이던 것 —
         기본 배경이 안 정해져 있었던 게 원인, 앱 배경색(흰색)으로 고정 */}
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: COLORS.canvas } }} />
+        {/* React Native Reusables의 Dialog/Select 등 포털 렌더링 컴포넌트가 필요로 함 */}
+        <PortalHost />
       </SafeAreaProvider>
     </QueryClientProvider>
   );

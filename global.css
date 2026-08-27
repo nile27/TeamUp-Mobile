@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* React Native Reusables(shadcn RN 포트) 컴포넌트가 참조하는 시맨틱 색 토큰.
+   실제 값은 DESIGN.md 브랜드 팔레트(amber/ink)를 그대로 매핑함 — 앱이
+   app.json userInterfaceStyle: "light"로 고정이라 dark 변형은 안 둠. */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 33 15% 15%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 33 15% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 33 15% 15%;
+
+  --primary: 33 100% 62%;
+  --primary-foreground: 33 15% 15%;
+
+  --secondary: 33 100% 94%;
+  --secondary-foreground: 33 15% 15%;
+
+  --muted: 210 17% 96%;
+  --muted-foreground: 33 10% 38%;
+
+  --accent: 33 100% 94%;
+  --accent-foreground: 33 15% 15%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 216 12% 84%;
+  --input: 216 12% 84%;
+  --ring: 33 100% 62%;
+
+  --radius: 0.5rem;
+}
