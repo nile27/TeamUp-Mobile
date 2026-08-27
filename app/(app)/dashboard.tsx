@@ -1,11 +1,14 @@
 import { router } from "expo-router";
-import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useSession } from "@/features/auth/use-session";
 import { useDashboard } from "@/features/dashboard/queries";
+import { useDeleteRecruit } from "@/features/recruit/mutations";
+import { useDeleteCommunityPost } from "@/features/community/mutations";
 import { supabase } from "@/server/supabase";
+import { ApiError } from "@/lib/api-client";
 import { COLORS } from "@/config/theme";
 
 const APPLICATION_STATUS_LABEL: Record<string, string> = {
@@ -17,10 +20,46 @@ const APPLICATION_STATUS_LABEL: Record<string, string> = {
 export default function DashboardScreen() {
   const { session, isLoading: isSessionLoading } = useSession();
   const { data, isLoading, isError, refetch } = useDashboard(!!session);
+  const deleteRecruitMutation = useDeleteRecruit();
+  const deletePostMutation = useDeleteCommunityPost();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.replace("/(auth)/login");
+  };
+
+  const handleDeleteRecruit = (id: string) => {
+    Alert.alert("이 모집글을 삭제할까요?", "지원 내역을 포함해 되돌릴 수 없습니다.", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: () => {
+          deleteRecruitMutation.mutate(id, {
+            onError: (error) => {
+              Alert.alert("삭제 실패", error instanceof ApiError ? error.message : "삭제 중 오류가 발생했습니다.");
+            },
+          });
+        },
+      },
+    ]);
+  };
+
+  const handleDeletePost = (id: string) => {
+    Alert.alert("이 글을 삭제할까요?", "댓글을 포함해 되돌릴 수 없습니다.", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: () => {
+          deletePostMutation.mutate(id, {
+            onError: (error) => {
+              Alert.alert("삭제 실패", error instanceof ApiError ? error.message : "삭제 중 오류가 발생했습니다.");
+            },
+          });
+        },
+      },
+    ]);
   };
 
   if (isSessionLoading || (session && isLoading)) {
@@ -57,37 +96,101 @@ export default function DashboardScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white p-4">
-      <View className="mb-4 flex-row items-center justify-between">
+    <ScrollView className="flex-1 bg-white" contentContainerClassName="p-4 gap-6">
+      <View className="flex-row items-center justify-between">
         <Text className="text-lg font-bold text-ink">{data.profile?.nickname ?? "마이페이지"}</Text>
         <Pressable onPress={handleLogout}>
           <Text className="text-sm text-ink-soft">로그아웃</Text>
         </Pressable>
       </View>
 
-      <Text className="mb-2 text-sm font-semibold text-ink">지원한 모집</Text>
-      {data.myApplications.length === 0 ? (
-        <Text className="text-ink-soft">아직 지원한 모집이 없어요.</Text>
-      ) : (
-        <FlatList
-          className="flex-1"
-          data={data.myApplications}
-          keyExtractor={(item) => item.id}
-          contentContainerClassName="gap-2"
-          renderItem={({ item }) => (
-            <Pressable onPress={() => router.push(`/(app)/recruit/${item.recruit.id}`)}>
-              <Card className="flex-row items-center gap-2 rounded-lg border border-gray-100 px-3 py-3 shadow-none">
-                <Text className="flex-1 text-ink" numberOfLines={1}>
-                  {item.recruit.title}
-                </Text>
-                <View className="shrink-0 rounded-full bg-gray-100 px-2 py-1">
-                  <Text className="text-xs text-ink-soft">{APPLICATION_STATUS_LABEL[item.status]}</Text>
-                </View>
+      <View className="gap-2">
+        <Text className="text-sm font-semibold text-ink">내 모집글</Text>
+        {data.myRecruits.length === 0 ? (
+          <Text className="text-ink-soft">아직 등록한 모집글이 없어요.</Text>
+        ) : (
+          <View className="gap-2">
+            {data.myRecruits.map((item) => (
+              <Card
+                key={item.id}
+                className="flex-row items-center gap-2 rounded-lg border border-gray-100 px-3 py-3 shadow-none"
+              >
+                <Pressable
+                  className="flex-1"
+                  onPress={() => router.push(`/(app)/recruit/${item.id}`)}
+                >
+                  <Text className="text-ink" numberOfLines={1}>
+                    {item.title}
+                  </Text>
+                </Pressable>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onPress={() => handleDeleteRecruit(item.id)}
+                  disabled={deleteRecruitMutation.isPending}
+                >
+                  <Text>삭제</Text>
+                </Button>
               </Card>
-            </Pressable>
-          )}
-        />
-      )}
-    </View>
+            ))}
+          </View>
+        )}
+      </View>
+
+      <View className="gap-2">
+        <Text className="text-sm font-semibold text-ink">내 작성글</Text>
+        {data.myPosts.length === 0 ? (
+          <Text className="text-ink-soft">아직 작성한 커뮤니티 글이 없어요.</Text>
+        ) : (
+          <View className="gap-2">
+            {data.myPosts.map((item) => (
+              <Card
+                key={item.id}
+                className="flex-row items-center gap-2 rounded-lg border border-gray-100 px-3 py-3 shadow-none"
+              >
+                <Pressable
+                  className="flex-1"
+                  onPress={() => router.push(`/(app)/community/${item.id}`)}
+                >
+                  <Text className="text-ink" numberOfLines={1}>
+                    {item.title}
+                  </Text>
+                </Pressable>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onPress={() => handleDeletePost(item.id)}
+                  disabled={deletePostMutation.isPending}
+                >
+                  <Text>삭제</Text>
+                </Button>
+              </Card>
+            ))}
+          </View>
+        )}
+      </View>
+
+      <View className="gap-2">
+        <Text className="text-sm font-semibold text-ink">지원한 모집</Text>
+        {data.myApplications.length === 0 ? (
+          <Text className="text-ink-soft">아직 지원한 모집이 없어요.</Text>
+        ) : (
+          <View className="gap-2">
+            {data.myApplications.map((item) => (
+              <Pressable key={item.id} onPress={() => router.push(`/(app)/recruit/${item.recruit.id}`)}>
+                <Card className="flex-row items-center gap-2 rounded-lg border border-gray-100 px-3 py-3 shadow-none">
+                  <Text className="flex-1 text-ink" numberOfLines={1}>
+                    {item.recruit.title}
+                  </Text>
+                  <View className="shrink-0 rounded-full bg-gray-100 px-2 py-1">
+                    <Text className="text-xs text-ink-soft">{APPLICATION_STATUS_LABEL[item.status]}</Text>
+                  </View>
+                </Card>
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }

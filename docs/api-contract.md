@@ -77,6 +77,18 @@ Authorization: Bearer <supabase access token>
 
 ---
 
+## `DELETE /api/recruit/[id]`
+
+모집글 삭제. **작성자 본인만**, 인증 필요. 역할·지원·저장은 DB `onDelete: Cascade`로 함께 삭제됨(클라이언트가 따로 정리할 것 없음).
+
+**응답**
+- `200` `{ "data": { "deleted": true } }`
+- `401` 미인증
+- `403` 작성자 아님
+- `404` 찾을 수 없음(이미 삭제됨 포함)
+
+---
+
 ## `POST /api/applications`
 
 지원. **인증 필요.**
@@ -142,8 +154,20 @@ Supabase Auth 회원가입 직후 Prisma `User` 프로필 레코드 생성(없�
 커뮤니티 글 상세 + 댓글.
 
 **응답**
-- `200` `{ "data": <CommunityPost> & { comments: [<Comment>], alreadyLiked: boolean } }` — `alreadyLiked`는 로그인 상태로 조회했을 때만 실제 값, 비로그인은 항상 `false`(모집 `alreadyApplied`와 동일 패턴)
+- `200` `{ "data": <CommunityPost> & { comments: [<Comment>], alreadyLiked: boolean } }` — `alreadyLiked`는 로그인 상태로 조회했을 때만 실제 값, 비로그인은 항상 `false`(모집 `alreadyApplied`와 동일 패턴). `author`에 `id`도 포함(목록 응답은 `nickname`만) — 삭제 버튼 노출 여부 판단용.
 - `404` 찾을 수 없음
+
+---
+
+## `DELETE /api/community/[id]`
+
+커뮤니티 글 삭제. **작성자 본인만**, 인증 필요. 댓글·좋아요는 DB `onDelete: Cascade`로 함께 삭제됨.
+
+**응답**
+- `200` `{ "data": { "deleted": true } }`
+- `401` 미인증
+- `403` 작성자 아님
+- `404` 찾을 수 없음(이미 삭제됨 포함)
 
 ---
 

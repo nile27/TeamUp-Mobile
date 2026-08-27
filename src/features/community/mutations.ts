@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { postCommunityComment, toggleCommunityLike } from "./api";
+import { deleteCommunityPost, postCommunityComment, toggleCommunityLike } from "./api";
 import type { CommunityPostDetail } from "./types";
 
 export function useToggleCommunityLike(postId: string) {
@@ -39,6 +39,17 @@ export function useAddCommunityComment(postId: string) {
     mutationFn: (content: string) => postCommunityComment(postId, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["community-detail", postId] });
+    },
+  });
+}
+
+export function useDeleteCommunityPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (postId: string) => deleteCommunityPost(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["community-list"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }

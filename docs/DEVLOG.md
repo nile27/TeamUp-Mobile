@@ -4,6 +4,27 @@
 
 ---
 
+## 2026-08-27 (4) — 모집글/커뮤니티글 삭제 기능 추가
+
+**배경**: 웹에 작성자 본인 삭제 기능(`DELETE /api/recruit/[id]`, `DELETE /api/community/[id]`)이 새로 생겨서, 모바일에도 동일하게 붙임.
+
+**추가한 것**
+- `src/lib/api-client.ts`: `apiDelete` 헬퍼 추가.
+- `src/features/recruit/{api,mutations}.ts`, `src/features/community/{api,mutations}.ts`: `deleteRecruit`/`deleteCommunityPost` + `useDeleteRecruit`/`useDeleteCommunityPost` 뮤테이션. 성공 시 관련 목록(`recruit-list`/`community-list`)과 `dashboard` 쿼리 무효화.
+- `src/features/community/types.ts`: `CommunityPostDetail`의 `author`에 `id` 추가(목록 응답은 `nickname`만 오지만 상세는 웹이 `id`도 내려줌 — 삭제 버튼 노출 여부 판단에 필요, 웹 소스(`getCommunityPostById`) 직접 확인 후 반영).
+- **모집 상세 / 커뮤니티 글 상세**: 작성자 본인일 때만(`recruit.author?.id === session.user.id`) 제목 옆에 "삭제" 버튼(`variant="destructive"`) 노출. `Alert.alert` 확인 다이얼로그 후 삭제, 성공하면 `router.back()`으로 이전 화면 복귀.
+- **마이페이지**: 그동안 화면에 아예 안 그려지고 있던 `myRecruits`(내 모집글)·`myPosts`(내 작성글) 섹션을 신설(원래 API엔 있었는데 화면에 안 쓰고 있었음) — 각 행에 삭제 버튼. 전체 화면을 `ScrollView`로 바꿔 섹션 3개(내 모집글/내 작성글/지원한 모집)를 한 화면에 배치.
+- `docs/api-contract.md`: `DELETE /api/recruit/[id]`, `DELETE /api/community/[id]` 문서화.
+
+**Realtime과의 관계**: 모집 목록은 이미 `Recruit` 테이블 전체 이벤트를 구독 중이라 삭제도 자동으로 목록에서 빠짐 — 그와 별개로 삭제한 화면에서 지연 없이 바로 보이도록 뮤테이션 성공 시에도 명시적으로 `invalidateQueries` 호출(중복이지만 즉시성 보장 목적, 해롭지 않음).
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 둘 다 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인: 본인 글에만 삭제 버튼 보이는지, 삭제 후 목록/마이페이지에서 바로 빠지는지, 다른 계정 글엔 버튼 자체가 안 보이는지.
+
+---
+
 ## 2026-08-27 (3) — 좋아요 취소 등 DELETE Realtime 이벤트 누락 — 확인만, 코드 수정 없음
 
 **신고된 증상**: 웹에서 좋아요 취소하면 모바일에 반영 안 됨(좋아요 누르는 건 정상 반영).

@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiDelete, apiGet, apiPost } from "@/lib/api-client";
 import type { Application, Recruit } from "./types";
 import type { CreateRecruitInput } from "@/schema/recruit";
 
@@ -17,4 +17,8 @@ export function createRecruit(input: CreateRecruitInput) {
 
 export function applyToRecruit(recruitId: string, message?: string) {
   return apiPost<Application>("/api/applications", { recruitId, message });
+}
+
+export function deleteRecruit(id: string) {
+  return apiDelete<{ deleted: boolean }>(`/api/recruit/${id}`);
 }

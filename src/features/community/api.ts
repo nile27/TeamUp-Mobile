@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiDelete, apiGet, apiPost } from "@/lib/api-client";
 import type { Comment, CommunityListResponse, CommunityPostDetail, CommunityTag } from "./types";
 
 export function fetchCommunityList(tag?: CommunityTag, page = 1) {
@@ -18,4 +18,8 @@ export function toggleCommunityLike(id: string) {
 
 export function postCommunityComment(id: string, content: string) {
   return apiPost<Comment>(`/api/community/${id}/comments`, { content });
+}
+
+export function deleteCommunityPost(id: string) {
+  return apiDelete<{ deleted: boolean }>(`/api/community/${id}`);
 }

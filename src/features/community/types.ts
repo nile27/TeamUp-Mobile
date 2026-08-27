@@ -19,7 +19,9 @@ export type Comment = {
   author: { nickname: string };
 };
 
-export type CommunityPostDetail = CommunityPost & {
+export type CommunityPostDetail = Omit<CommunityPost, "author"> & {
+  // 상세 조회만 author.id를 내려줌(목록은 nickname만) — 삭제 버튼 노출 여부 판단용.
+  author: { id: string; nickname: string };
   comments: Comment[];
   // 로그인 상태로 상세 조회했을 때만 실제 값(비로그인 응답은 항상 false).
   alreadyLiked: boolean;

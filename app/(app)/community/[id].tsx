@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -14,7 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useSession } from "@/features/auth/use-session";
 import { useCommunityDetail } from "@/features/community/queries";
-import { useAddCommunityComment, useToggleCommunityLike } from "@/features/community/mutations";
+import {
+  useAddCommunityComment,
+  useDeleteCommunityPost,
+  useToggleCommunityLike,
+} from "@/features/community/mutations";
 import { COMMUNITY_TAG_LABEL } from "@/config/labels";
 import { ApiError } from "@/lib/api-client";
 import { COLORS } from "@/config/theme";
@@ -25,8 +30,10 @@ export default function CommunityDetailScreen() {
   const { data: post, isLoading, isError, refetch, isRefetching } = useCommunityDetail(id);
   const likeMutation = useToggleCommunityLike(id);
   const commentMutation = useAddCommunityComment(id);
+  const deleteMutation = useDeleteCommunityPost();
   const [commentText, setCommentText] = useState("");
   const [commentError, setCommentError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   // isPending은 mutate() 호출 후 리렌더가 반영돼야 true가 되는데, 연속 탭이 그 리렌더
   // 사이에 다 들어오면 매번 새 toggle 요청이 겹쳐 나가서 최종 상태가 꼬였음(연타 버그) —
   // 리렌더를 기다리지 않는 ref로 동기 가드.
@@ -50,6 +57,27 @@ export default function CommunityDetailScreen() {
       </View>
     );
   }
+
+  const isAuthor = !!session && post.author.id === session.user.id;
+
+  const handleDelete = () => {
+    Alert.alert("이 글을 삭제할까요?", "댓글을 포함해 되돌릴 수 없습니다.", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: () => {
+          setDeleteError(null);
+          deleteMutation.mutate(id, {
+            onSuccess: () => router.back(),
+            onError: (error) => {
+              setDeleteError(error instanceof ApiError ? error.message : "삭제 중 오류가 발생했습니다.");
+            },
+          });
+        },
+      },
+    ]);
+  };
 
   const handleLike = () => {
     if (!session) {
@@ -93,8 +121,23 @@ export default function CommunityDetailScreen() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
         ListHeaderComponent={
           <View className="mb-4 gap-3">
-            <Text className="text-xs font-medium text-amber-deep">{COMMUNITY_TAG_LABEL[post.tag]}</Text>
-            <Text className="text-xl font-bold text-ink">{post.title}</Text>
+            <View className="flex-row items-start justify-between">
+              <View className="flex-1 gap-1">
+                <Text className="text-xs font-medium text-amber-deep">{COMMUNITY_TAG_LABEL[post.tag]}</Text>
+                <Text className="text-xl font-bold text-ink">{post.title}</Text>
+              </View>
+              {isAuthor && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onPress={handleDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Text>삭제</Text>
+                </Button>
+              )}
+            </View>
+            {deleteError && <Text className="text-sm text-red-500">{deleteError}</Text>}
             <Text className="text-xs text-ink-soft">{post.author.nickname}</Text>
             <Text className="leading-6 text-ink">{post.content}</Text>
 

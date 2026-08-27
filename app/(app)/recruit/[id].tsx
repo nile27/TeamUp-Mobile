@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/features/auth/use-session";
 import { useRecruitDetail } from "@/features/recruit/queries";
-import { useApplyToRecruit } from "@/features/recruit/mutations";
+import { useApplyToRecruit, useDeleteRecruit } from "@/features/recruit/mutations";
 import { RECRUIT_TYPE_LABEL } from "@/config/labels";
 import { ApiError } from "@/lib/api-client";
 import { COLORS } from "@/config/theme";
@@ -15,7 +15,9 @@ export default function RecruitDetailScreen() {
   const { session } = useSession();
   const { data: recruit, isLoading, isError, refetch } = useRecruitDetail(id);
   const applyMutation = useApplyToRecruit(id);
+  const deleteMutation = useDeleteRecruit();
   const [applyError, setApplyError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -37,6 +39,26 @@ export default function RecruitDetailScreen() {
   }
 
   const applied = recruit.alreadyApplied || applyMutation.isSuccess;
+  const isAuthor = !!session && recruit.author?.id === session.user.id;
+
+  const handleDelete = () => {
+    Alert.alert("이 모집글을 삭제할까요?", "지원 내역을 포함해 되돌릴 수 없습니다.", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: () => {
+          setDeleteError(null);
+          deleteMutation.mutate(id, {
+            onSuccess: () => router.back(),
+            onError: (error) => {
+              setDeleteError(error instanceof ApiError ? error.message : "삭제 중 오류가 발생했습니다.");
+            },
+          });
+        },
+      },
+    ]);
+  };
 
   const handleApply = () => {
     if (!session) {
@@ -54,8 +76,23 @@ export default function RecruitDetailScreen() {
   return (
     <View className="flex-1 bg-white">
       <ScrollView contentContainerClassName="p-4 pb-24 gap-4">
-        <Text className="text-xs font-medium text-amber-deep">{RECRUIT_TYPE_LABEL[recruit.type]}</Text>
-        <Text className="text-xl font-bold text-ink">{recruit.title}</Text>
+        <View className="flex-row items-start justify-between">
+          <View className="flex-1 gap-1">
+            <Text className="text-xs font-medium text-amber-deep">{RECRUIT_TYPE_LABEL[recruit.type]}</Text>
+            <Text className="text-xl font-bold text-ink">{recruit.title}</Text>
+          </View>
+          {isAuthor && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onPress={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              <Text>삭제</Text>
+            </Button>
+          )}
+        </View>
+        {deleteError && <Text className="text-sm text-red-500">{deleteError}</Text>}
 
         <View className="gap-1">
           <Text className="text-sm text-ink-soft">기획 완성도</Text>

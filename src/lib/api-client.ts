@@ -34,6 +34,14 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return handleResponse<T>(res, "POST", path);
 }
 
+export async function apiDelete<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "DELETE",
+    headers: await authHeader(),
+  });
+  return handleResponse<T>(res, "DELETE", path);
+}
+
 async function handleResponse<T>(res: Response, method: string, path: string): Promise<T> {
   let json: { data?: T; error?: string; fieldErrors?: Record<string, string[]> };
   try {
