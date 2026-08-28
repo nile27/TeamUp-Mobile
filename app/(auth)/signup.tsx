@@ -67,7 +67,7 @@ export default function SignupScreen() {
           name="nickname"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
+              className="mb-1 h-12 rounded-lg border border-gray-300 px-4 py-3 text-ink"
               placeholder="2~20자"
               onChangeText={(text) => {
                 setServerError(null);
@@ -87,7 +87,7 @@ export default function SignupScreen() {
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
+              className="mb-1 h-12 rounded-lg border border-gray-300 px-4 py-3 text-ink"
               placeholder="you@example.com"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -109,7 +109,7 @@ export default function SignupScreen() {
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              className="mb-1 rounded-lg border border-gray-300 px-4 py-3 text-ink"
+              className="mb-1 h-12 rounded-lg border border-gray-300 px-4 py-3 text-ink"
               placeholder="영문+숫자+특수문자 8자 이상"
               secureTextEntry
               onChangeText={(text) => {

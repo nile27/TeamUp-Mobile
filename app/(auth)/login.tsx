@@ -74,7 +74,7 @@ export default function LoginScreen() {
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
-                    className="rounded-lg border-0 bg-white py-3 pl-10 pr-4 text-ink shadow-sm shadow-black/5"
+                    className="h-12 rounded-lg border-0 bg-white py-3 pl-10 pr-4 text-ink shadow-sm shadow-black/5"
                     placeholder="you@example.com"
                     autoCapitalize="none"
                     keyboardType="email-address"
@@ -105,7 +105,7 @@ export default function LoginScreen() {
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
-                    className="rounded-lg border-0 bg-white py-3 pl-10 pr-4 text-ink shadow-sm shadow-black/5"
+                    className="h-12 rounded-lg border-0 bg-white py-3 pl-10 pr-4 text-ink shadow-sm shadow-black/5"
                     placeholder="********"
                     secureTextEntry
                     onChangeText={(text) => {
