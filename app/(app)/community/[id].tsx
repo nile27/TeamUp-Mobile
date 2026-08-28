@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert, FlatList, KeyboardAvoidingView, Platform, RefreshControl, View } from "react-native";
+import { Alert, RefreshControl, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Ionicons } from "@expo/vector-icons";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
@@ -106,79 +107,82 @@ export default function CommunityDetailScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    // 탭 네비게이터 안(react-native-screens Fragment) 화면이라 RN 기본 Keyboard
+    // 이벤트/adjustResize/react-native-keyboard-aware-scroll-view 전부 안 먹혔음 —
+    // 네이티브로 키보드 위치를 직접 추적하는 react-native-keyboard-controller로 해결.
+    // mode="layout"이라 mt-auto인 입력 바가 키보드 공간만큼 실제로 밀려 올라옴.
+    <KeyboardAwareScrollView
+      style={{ flex: 1, backgroundColor: COLORS.canvas }}
+      contentContainerStyle={{ flexGrow: 1 }}
+      mode="layout"
+      bottomOffset={16}
+      keyboardShouldPersistTaps="handled"
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
     >
-      <FlatList
-        className="flex-1"
-        data={post.comments}
-        keyExtractor={(item) => item.id}
-        contentContainerClassName="gap-4 p-4"
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-        ListHeaderComponent={
-          <View className="mb-4 gap-4">
-            <View className="flex-row items-start justify-between">
-              <View className="flex-1 gap-2">
-                <View className="self-start rounded-md bg-amber-soft px-2 py-1">
-                  <Text className="text-xs font-semibold text-amber-deep">
-                    {COMMUNITY_TAG_LABEL[post.tag]}
-                  </Text>
-                </View>
-                <Text className="text-2xl font-extrabold tracking-tight text-ink">{post.title}</Text>
-              </View>
-              {isAuthor && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onPress={handleDelete}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Text>삭제</Text>
-                </Button>
-              )}
+      <View className="gap-4 p-4">
+        <View className="flex-row items-start justify-between">
+          <View className="flex-1 gap-2">
+            <View className="self-start rounded-md bg-amber-soft px-2 py-1">
+              <Text className="text-xs font-semibold text-amber-deep">{COMMUNITY_TAG_LABEL[post.tag]}</Text>
             </View>
-            {deleteError && <Text className="text-sm text-red-500">{deleteError}</Text>}
-            <View className="flex-row items-center gap-2">
-              <Avatar name={post.author.nickname} size={28} />
-              <Text className="text-sm text-ink-soft">{post.author.nickname}</Text>
-            </View>
-            <Text className="leading-6 text-ink">{post.content}</Text>
-
-            <Button
-              variant="ghost"
-              onPress={handleLike}
-              disabled={likeMutation.isPending}
-              className={`flex-row items-center gap-1.5 self-start rounded-full border px-4 py-2 shadow-none ${
-                post.alreadyLiked ? "border-amber bg-amber-soft" : "border-gray-300"
-              }`}
-            >
-              <Ionicons
-                name={post.alreadyLiked ? "heart" : "heart-outline"}
-                size={16}
-                color={post.alreadyLiked ? COLORS.amberDeep : COLORS.inkSoft}
-              />
-              <Text className={post.alreadyLiked ? "font-semibold text-ink" : "text-ink-soft"}>
-                {post._count.likes}
-              </Text>
-            </Button>
-
-            <Text className="mt-2 text-sm font-semibold text-ink">댓글 {post._count.comments}</Text>
+            <Text className="text-2xl font-extrabold tracking-tight text-ink">{post.title}</Text>
           </View>
-        }
-        ListEmptyComponent={<Text className="text-ink-soft">아직 댓글이 없어요.</Text>}
-        renderItem={({ item }) => (
-          <Card className="flex-row gap-3 rounded-lg border-0 bg-gray-50 p-3 shadow-none">
-            <Avatar name={item.author.nickname} size={24} />
-            <View className="flex-1 gap-1">
-              <Text className="text-xs text-ink-soft">{item.author.nickname}</Text>
-              <Text className="text-ink">{item.content}</Text>
-            </View>
-          </Card>
-        )}
-      />
+          {isAuthor && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onPress={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              <Text>삭제</Text>
+            </Button>
+          )}
+        </View>
+        {deleteError && <Text className="text-sm text-red-500">{deleteError}</Text>}
+        <View className="flex-row items-center gap-2">
+          <Avatar name={post.author.nickname} size={28} />
+          <Text className="text-sm text-ink-soft">{post.author.nickname}</Text>
+        </View>
+        <Text className="leading-6 text-ink">{post.content}</Text>
 
-      <View className="border-t border-gray-100 bg-white p-4">
+        <Button
+          variant="ghost"
+          onPress={handleLike}
+          disabled={likeMutation.isPending}
+          className={`flex-row items-center gap-1.5 self-start rounded-full border px-4 py-2 shadow-none ${
+            post.alreadyLiked ? "border-amber bg-amber-soft" : "border-gray-300"
+          }`}
+        >
+          <Ionicons
+            name={post.alreadyLiked ? "heart" : "heart-outline"}
+            size={16}
+            color={post.alreadyLiked ? COLORS.amberDeep : COLORS.inkSoft}
+          />
+          <Text className={post.alreadyLiked ? "font-semibold text-ink" : "text-ink-soft"}>
+            {post._count.likes}
+          </Text>
+        </Button>
+
+        <Text className="mt-2 text-sm font-semibold text-ink">댓글 {post._count.comments}</Text>
+
+        {post.comments.length === 0 ? (
+          <Text className="text-ink-soft">아직 댓글이 없어요.</Text>
+        ) : (
+          <View className="gap-3">
+            {post.comments.map((item) => (
+              <Card key={item.id} className="flex-row gap-3 rounded-lg border-0 bg-gray-50 p-3 shadow-none">
+                <Avatar name={item.author.nickname} size={24} />
+                <View className="flex-1 gap-1">
+                  <Text className="text-xs text-ink-soft">{item.author.nickname}</Text>
+                  <Text className="text-ink">{item.content}</Text>
+                </View>
+              </Card>
+            ))}
+          </View>
+        )}
+      </View>
+
+      <View className="mt-auto border-t border-gray-100 bg-white p-4">
         {commentError && <Text className="mb-2 text-sm text-red-500">{commentError}</Text>}
         <View className="flex-row items-center gap-2">
           <Input
@@ -198,6 +202,6 @@ export default function CommunityDetailScreen() {
           </Button>
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
