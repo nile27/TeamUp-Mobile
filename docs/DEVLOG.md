@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-08-28 (18) — 랜딩 화면 redesign 스킬 적용
+
+**적용**: `.agents/skills/redesign-existing-projects`의 오디트 체크리스트를 `app/(auth)/landing.tsx`에 적용.
+- 아이콘 통일: 문제(Why TeamUp)/역할(Participation) 섹션의 이모지(🤔🔍🚀💡✍️💻)를 커뮤니티/모집 화면과 같은 Ionicons(`bulb-outline`/`people-outline`/`rocket-outline`/`create-outline`/`code-slash-outline`)로 교체, 앰버 톤 원형 배지 안에 배치.
+- 헤드라인 타이포 강화: Hero `text-3xl`→`text-4xl`, 섹션 소제목 `text-xl`→`text-2xl`, 트래킹 타이트하게.
+- 앰버 틴트 섀도우: FilterCarousel 때 썼던 패턴(`shadow-amber-deep/10~30`)을 CTA 버튼·스텝 넘버 배지·역할 카드에 적용해 밋밋한 `shadow-none`/무배경 카드 탈피.
+- 프레스 피드백: 뒤로가기 버튼·CTA 버튼에 `active:opacity-*` 추가(눌렀을 때 반응 없던 문제).
+- 여백: 섹션 간 padding/gap을 한 단계씩 키움(`py-10`→`py-12`, `gap-5/6`→`gap-6/7`).
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+---
+
 ## 2026-08-28 (17) — 로그인/회원가입 입력창 높이 고정값과 padding 충돌로 텍스트가 내부 스크롤되던 버그
 
 **증상**: "Placeholder에 왜 스크롤이 되는지 모르겠다" — 로그인/회원가입 입력창에 포커스하면 안에서 텍스트/placeholder가 위아래로 살짝 스크롤되는 느낌.
