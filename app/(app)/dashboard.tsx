@@ -104,7 +104,7 @@ export default function DashboardScreen() {
           {data.profile?.nickname ?? "마이페이지"}
         </Text>
         <Pressable onPress={handleLogout}>
-          <Text className="text-sm text-ink-soft">로그아웃</Text>
+          <Text className="font-semibold text-amber-deep">로그아웃</Text>
         </Pressable>
       </View>
 

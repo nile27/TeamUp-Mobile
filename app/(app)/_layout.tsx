@@ -1,11 +1,12 @@
-import { Tabs } from "expo-router";
+import { Tabs, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { useSession } from "@/features/auth/use-session";
 import { COLORS } from "@/config/theme";
 
 export default function AppLayout() {
-  const { isLoading } = useSession();
+  const { session, isLoading } = useSession();
 
   if (isLoading) {
     return (
@@ -27,6 +28,14 @@ export default function AppLayout() {
         // 하단 탭 바가 항상 떠있는 상태로 리사이즈 계산에 끼어드는 게 원인이었음.
         // 키보드 뜨면 탭 바 자체를 숨겨서 공간을 온전히 확보.
         tabBarHideOnKeyboard: true,
+        // 비로그인 "둘러보기" 중엔 로그인 화면으로 돌아갈 직관적인 수단이 없었음 —
+        // 헤더 오른쪽에 항상 보이는 로그인 버튼으로 어디서든 바로 돌아갈 수 있게.
+        headerRight: () =>
+          !session ? (
+            <Pressable onPress={() => router.push("/(auth)/login")} className="mr-4">
+              <Text className="font-semibold text-amber-deep">로그인</Text>
+            </Pressable>
+          ) : null,
       }}
     >
       <Tabs.Screen
