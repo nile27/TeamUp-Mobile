@@ -29,7 +29,7 @@ export default function RecruitListScreen() {
     <View className="flex-1 bg-white">
       <View className="px-4 py-3">
         <FilterCarousel
-          label="기술 스택"
+          label="기술 스택 필터링"
           options={FILTER_CHIPS}
           selected={stackFilter}
           onToggle={toggleStack}
