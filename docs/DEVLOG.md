@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-08-28 (19) — EAS internal 빌드 배포 + GitHub Release 공유 + 환경변수 크래시 수정
+
+**배경**: 개발 파일럿을 여기서 일단 마무리하기로 하고, 시연 가능한 APK를 GitHub Release로 공유하기로 함.
+
+**expo-updates 도입**: `eas update` 최초 실행 시 이 프로젝트에 없던 `expo-updates`가 자동 설치되고 `app.json`에 `updates.url`/`runtimeVersion` 설정이 추가됨(별도 커밋 07f8536). **주의**: 이 시점 이전에 빌드된 APK(`b8f3023a...` dev client)는 이 네이티브 모듈이 없어 OTA를 받을 수 없음 — OTA는 이 커밋 이후 새로 빌드된 APK부터만 유효.
+
+**크래시 삽질 → 원인 → 수정**: `eas build -p android --profile internal`로 첫 internal APK를 빌드해 GitHub Release(`v1.0.0-internal`)에 올렸는데, 설치 후 **실행하자마자 바로 꺼짐**. 원인: EAS 프로젝트의 클라우드 환경변수(`eas env:list`)가 `preview`/`development` 둘 다 비어있어서, 빌드 시 `EXPO_PUBLIC_SUPABASE_URL`/`EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`가 안 들어간 채 빌드됨 — Supabase 클라이언트 초기화가 앱 시작과 동시에 실패해 즉시 크래시. `.env`는 `.gitignore`(로컬 전용) 대상이라 EAS 빌드 서버로 넘어가지 않고, EAS 클라우드 환경변수로 별도 등록해야 하는 걸 몰랐던 게 원인.
+
+**수정**: `eas env:set`으로 `.env`의 3개 값(`EXPO_PUBLIC_API_BASE_URL`/`EXPO_PUBLIC_SUPABASE_URL`/`EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`)을 `preview`·`development` 환경 둘 다에 등록(`production`은 아직 미등록 — 나중에 실제 프로덕션 빌드 쓸 때 추가 필요) → 재빌드 → 정상 실행 확인.
+
+**배포**: 최종 APK를 GitHub Release `v1.0.0-internal`(https://github.com/nile27/TeamUp-Mobile/releases/tag/v1.0.0-internal)에 첨부. 설치 방법(출처 불명 앱 허용)과 "포트폴리오용 파일럿, 실서비스 아님" 안내를 릴리즈 노트에 포함.
+
+**다음 할 일**:
+- [ ] `production` 환경변수도 등록해두기 (나중에 정식 배포 프로필 쓸 때).
+- [ ] 이후 JS/스타일만 바뀌는 변경은 재빌드 없이 `eas update --channel internal`로 이 APK에 OTA 반영 가능.
+
+---
+
 ## 2026-08-28 (18) — 랜딩 화면 redesign 스킬 적용
 
 **적용**: `.agents/skills/redesign-existing-projects`의 오디트 체크리스트를 `app/(auth)/landing.tsx`에 적용.
