@@ -4,6 +4,131 @@
 
 ---
 
+## 2026-08-28 (9) — 캐러셀 페이드가 첫/마지막 칩 글자를 가리던 버그
+
+**실기기 스크린샷 확인**: 모집 카드 기술 스택 캐러셀에서 첫 번째 칩("Vue.js", "TypeScript")의 앞글자가 흰색 페이드에 잘려 보임. `HorizontalCarousel`의 좌우 페이드 오버레이가 스크롤 위치와 무관하게 항상 떠 있어서, 더 스크롤할 콘텐츠가 없는 맨 처음/맨 끝에서도 페이드가 첫/마지막 칩을 덮고 있었던 것.
+
+**수정**: `onScroll`/`onContentSizeChange`/`onLayout`로 스크롤 오프셋·콘텐츠/컨테이너 너비를 추적해서, 실제로 왼쪽/오른쪽에 가려진 콘텐츠가 있을 때만(`canScrollLeft`/`canScrollRight`) 해당 쪽 페이드를 렌더링하도록 변경.
+
+**추가**: 로그인/회원가입 화면도 `react-native-keyboard-controller`의 `KeyboardAwareScrollView`를 커뮤니티 상세와 다른 모드(기본값 `"insets"`)로 쓰고 있었는데, 새 APK로 재확인해보니 커뮤니티는 되고 로그인/회원가입은 여전히 안 됨 — 커뮤니티에서 확인된 `mode="layout"`으로 셋 다 통일.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인: 캐러셀 첫/마지막 칩 글자가 안 잘리는지, 로그인/회원가입도 `mode="layout"`으로 키보드 가림 해결됐는지.
+
+---
+
+## 2026-08-28 (7) — 키보드 가림 문제, 결국 네이티브 라이브러리(`react-native-keyboard-controller`)로 재빌드
+
+**실기기 확인 결과**: 어제 만든 수동 `Keyboard` 리스너 방식도 커뮤니티 상세에서 전혀 안 먹힘("화면이 전혀 안 움직임"). `npx expo prebuild`로 로컬에 네이티브 프로젝트를 생성해 `AndroidManifest.xml`을 직접 확인해보니 `windowSoftInputMode="adjustResize"`는 정상적으로 박혀있었음(확인 후 `/android` 폴더는 삭제, 원래 관리형 워크플로우 유지) — 즉 매니페스트 설정 문제가 아니라, **이 화면이 탭 네비게이터 안(react-native-screens Fragment)에 있어서 RN 기본 `Keyboard` 이벤트/윈도우 리사이즈가 그 안까지 안 전파되는 것**으로 추정. 로그인/회원가입(탭 밖, 별도 스택)에서는 정상 작동했던 것과 대비됨.
+
+**결정**: JS 전용 방법으로는 한계라고 판단해 사용자 확인 후 네이티브 모듈이 필요한 `react-native-keyboard-controller`로 교체 진행(EAS 재빌드 필요, Metro 리로드만으로는 반영 안 됨).
+
+**적용**
+- `npx expo install react-native-keyboard-controller` (SDK 57 호환 확인됨).
+- `app/_layout.tsx` 최상위를 `KeyboardProvider`로 감쌈(어느 화면에서든 이 라이브러리의 컴포넌트를 쓰려면 필수).
+- `app/(app)/community/[id].tsx`: 수동 `Keyboard` 리스너/`scrollToEnd` 로직 전부 제거하고 `KeyboardAwareScrollView`(`mode="layout"`, `bottomOffset={16}`)로 교체 — `mode="layout"`이라 `mt-auto`인 입력 바가 키보드 공간만큼 실제로 레이아웃이 밀려 올라옴(네이티브로 키보드 위치를 직접 추적해서 react-native-screens Fragment 안에서도 동작).
+- `app/(auth)/login.tsx`, `signup.tsx`: 기존에 쓰던 `react-native-keyboard-aware-scroll-view`(2021년산 오래된 라이브러리, 로그인/회원가입에선 됐지만 탭 화면에선 전혀 안 먹혔음)를 같은 `react-native-keyboard-controller`의 `KeyboardAwareScrollView`로 통일 — 라이브러리 하나로 일관성 유지. 기존 의존성은 `npm uninstall`로 제거.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과(웹은 네이티브 모듈이 스텁으로 처리돼 번들만 확인, 실제 동작 검증은 안 됨). EAS 개발 빌드(`development` 프로필) 실행 — 네이티브 코드가 추가된 변경이라 Metro 리로드로는 반영 안 되고 새 APK 설치가 필요함.
+
+**다음 할 일**:
+- [ ] EAS 빌드 완료되면 새 APK 재설치 후 로그인/회원가입/커뮤니티 댓글 세 화면 전부 키보드 가림 재확인.
+
+---
+
+## 2026-08-28 (6) — `react-native-keyboard-aware-scroll-view`가 탭 화면에서 안 먹어서 직접 구현으로 교체
+
+**실기기 확인 결과**: 리로드해서 확인해보니 커뮤니티 상세에서 스크롤 자체가 전혀 안 움직임 — 로그인/회원가입(탭 밖, 별도 스택)에서는 됐는데 탭 네비게이터 안에 있는 화면에서는 라이브러리가 작동을 안 함. 2021년쯤 나온 오래된 라이브러리라 New Architecture(Fabric) + 탭 네비게이터 조합에서 포커스된 입력창을 찾아 위치를 계산하는 내부 로직이 안 먹는 것으로 추정(정확한 원인 확인은 못 함, 라이브러리 자체를 안 쓰는 쪽으로 우회).
+
+**최종 해결 — 라이브러리 없이 표준 `Keyboard` API로 직접 구현**: 댓글 입력창이 이 화면에서 항상 맨 아래 요소라는 점을 이용:
+- `Keyboard.addListener("keyboardWillShow"/"keyboardDidShow", ...)`로 키보드 높이를 상태로 저장, `ScrollView`의 `contentContainerStyle.paddingBottom`에 그 값을 그대로 줘서 키보드 높이만큼 스크롤 여유 공간 확보.
+- 입력창 `onFocus` 시 `scrollRef.current?.scrollToEnd({ animated: true })` 호출 — 맨 아래로 스크롤되면서 방금 확보한 여유 공간 덕에 키보드 위로 올라옴.
+- `react-native-keyboard-aware-scroll-view` 의존성은 그대로 두되(로그인/회원가입엔 정상 작동 중) 이 화면에서만 안 씀.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과. 실기기 확인은 사용자 몫.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인: 댓글 입력창 포커스 시 키보드 위로 스크롤되는지.
+- [ ] 이 패턴(라이브러리 대신 직접 구현)이 안정적으로 확인되면, 혹시 다른 탭 화면에도 비슷한 입력창이 생길 경우 재사용할 수 있게 훅으로 뽑아낼지 검토.
+
+---
+
+## 2026-08-28 (5) — 커뮤니티 댓글 입력창 키보드 가림, 결국 구조를 바꿔서 해결
+
+로그인/회원가입은 고쳤는데, 사용자가 재확인해보니 커뮤니티 댓글 화면도 여전히 같은 증상. 이 화면은 `FlatList`(댓글 목록) + 화면 하단에 별도로 고정된 입력 바 구조라 `KeyboardAwareScrollView`를 그대로 못 씀(FlatList를 ScrollView로 감싸는 중첩 스크롤 문제, 어제도 같은 이유로 이 라이브러리를 여기 적용 안 하기로 했었음).
+
+**최종 해결**: 댓글 수가 많지 않은 화면이라 `FlatList` 가상화를 포기하고, 전체(글 내용 + 댓글 목록 + 입력 바)를 `KeyboardAwareScrollView` 하나 안에 일반 콘텐츠로 넣음(댓글은 `.map()`으로 렌더). 입력창이 포커스되면 로그인/회원가입과 똑같은 방식으로 스크롤되어 키보드 위로 올라옴. pull-to-refresh는 `FlatList`의 `refreshControl` 대신 `ScrollView` 계열이 공통으로 지원하는 `refreshControl` prop으로 그대로 유지. 입력 바는 `mt-auto`로 콘텐츠가 적을 땐 화면 하단에 붙어있게.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 댓글 입력창 포커스 시 키보드에 안 가리는지, 댓글 많은 글에서도 스크롤이 자연스러운지 확인.
+
+---
+
+## 2026-08-28 (4) — 로그인/회원가입 키보드 가림을 `react-native-keyboard-aware-scroll-view`로 교체
+
+사용자가 참고 링크(velog 글)로 제안한 `react-native-keyboard-aware-scroll-view` 라이브러리 적용 검토. 순수 JS 라이브러리라 dev-client 재빌드 없이 바로 테스트 가능.
+
+**적용 범위 판단**: 이 라이브러리는 "ScrollView 안에 쌓인 입력창을 포커스 시 위로 스크롤"하는 방식이라, 화면 하단에 별도로 고정된 입력 바(그 위에 `FlatList`가 따로 스크롤되는) 구조인 **커뮤니티 댓글 화면엔 안 맞음**(FlatList를 ScrollView로 또 감싸는 중첩 스크롤 안티패턴이 됨) — 반대로 **로그인/회원가입처럼 세로로 쌓인 입력창 여러 개를 감싼 ScrollView 케이스엔 정확히 들어맞음**. 사용자 확인 후 로그인/회원가입에만 적용.
+
+**적용**: `npm install react-native-keyboard-aware-scroll-view`, `app/(auth)/login.tsx`·`signup.tsx`의 수동 `KeyboardAvoidingView`+`ScrollView` 조합을 `KeyboardAwareScrollView` 하나로 교체(`enableOnAndroid`, `extraScrollHeight={20}`).
+
+**주의**: `KeyboardAwareScrollView`는 NativeWind가 `className`을 자동 인식하는 컴포넌트 목록(View/Text/ScrollView 등 `react-native` 직수입 컴포넌트)에 없는 서드파티 컴포넌트라, `className`/`contentContainerClassName`을 줘도 스타일이 적용 안 됨 — 컴포넌트 자체엔 인라인 `style`/`contentContainerStyle`(일반 RN 스타일 객체)로 줘야 함. 내부 자식 요소(View/Text/Button/Input)는 그대로 NativeWind `className` 사용.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 로그인/회원가입 폼 하단 입력창(특히 회원가입의 비밀번호 필드)에 포커스했을 때 키보드에 안 가리는지 확인.
+
+---
+
+## 2026-08-28 (3) — 링크 탭 영역 버그 + 둘러보기 중 로그인 복귀 수단 없음
+
+**"TeamUp이 궁금하다면?" 링크의 탭 가능 영역이 텍스트보다 넓음**: `Pressable`이 부모 flex-col의 기본 `align-items: stretch` 때문에 화면 너비 전체로 늘어나 있어서, 글자 옆 빈 공간을 눌러도 링크가 열림. `className="self-start"` 추가해 텍스트 크기만큼만 탭 영역이 줄어들게 수정. 같은 이유로 "로그인 없이 둘러보기"도 `items-center`(내부 정렬만 함, 컨테이너 자체는 여전히 풀와이드) → `self-center`(컨테이너 자체를 콘텐츠 크기로 줄이고 가운데 정렬)로 수정.
+
+**비로그인 "둘러보기" 중 로그인 화면으로 돌아갈 직관적인 수단이 없음**: 지원하기/마이페이지 진입 시에만 간접적으로 로그인 화면으로 유도됐지, 그냥 둘러보다가 로그인하고 싶어지면 갈 방법이 없었음. `app/(app)/_layout.tsx`의 `Tabs` `headerRight`에 비로그인 상태일 때만 보이는 "로그인" 버튼 추가 — 모집/커뮤니티/마이페이지 어느 탭에 있든 헤더 오른쪽에 항상 노출.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+---
+
+## 2026-08-28 (2) — 로그인/회원가입 폼 "Invalid input: expected string" 버그 수정
+
+**증상**: 로그인 화면에서 입력창 탭했다가 아무것도 안 치고 포커스를 다른 곳으로 옮기면(blur), 입력창 밑에 "Invalid input: expected string. received undefined"라는 zod 원본 에러 메시지가 그대로 노출됨.
+
+**원인**: `useForm`에 `defaultValues`를 안 줘서 필드 초기값이 `undefined`였음. `mode: "onBlur"`라 아무것도 안 쳐도 blur 시점에 검증이 도는데, `z.string().email(...)`이 `undefined`를 받으면 `.email()` 커스텀 메시지("유효한 이메일 주소를 입력해주세요")까지 가기 전에 **기본 타입 체크(`string`)에서부터 실패**해서 zod가 자동 생성한 영어 원본 메시지가 그대로 뜬 것 — 스키마 자체는 정상이었고 폼 초기화 방식이 문제였음.
+
+**수정**: `app/(auth)/login.tsx`, `signup.tsx` 둘 다 `useForm`에 `defaultValues: { email: "", ... }`(빈 문자열)를 추가 — 필드가 항상 `string` 타입으로 시작해서 커스텀 메시지가 정상적으로 뜨게 됨.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+---
+
+## 2026-08-28 — 로그인 화면 리디자인 (여백 부족, 회원가입 버튼 존재감)
+
+**피드백**: 요소마다 `mb-1`~`mb-6`로 제각각 촘촘하게 붙어있어 답답해 보임. 특히 "로그인 없이 둘러보기"와 "아직 계정이 없으신가요? 회원가입"이 바로 붙어있어서 구분이 안 되고, "회원가입" 링크는 일반 텍스트(`text-sm text-ink-soft`)라 버튼인지 인지가 안 됨.
+
+**수정**: `app/(auth)/login.tsx` 레이아웃을 개별 `mb-*` 대신 섹션별 `gap`(헤더 `gap-2`, 폼 필드 `gap-5`, 필드 내부 `gap-1.5`, 버튼 그룹 `gap-3`)으로 재구성해 리듬을 통일하고 전반적으로 여백 확대. "회원가입"을 텍스트 링크에서 `Button variant="outline"`(로그인 버튼과 같은 크기, amber 테두리 + amber 글자색)으로 바꿔서 로그인 버튼 바로 아래 **버튼 그룹**으로 묶고, "로그인 없이 둘러보기"는 `mt-10`으로 확실히 떨어뜨려서 별개의 3차 액션(둘러보기)과 회원가입 유도(2차 액션)를 시각적으로 구분.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**추가 피드백 — "회원가입은 버튼 아니어도 됨" + "디자인 구림"**: 회원가입은 다시 텍스트 링크로(버튼화는 과했다는 의견) 되돌리되, 이전과 달리 `font-semibold text-amber-deep underline`으로 색·굵기를 줘서 최소한 "그냥 텍스트"와는 구분되게. 전체적으로 "redesign 스킬 쓴 거 맞냐"는 지적에 폼 자체를 다시 감사 — 입력창이 흰 배경에 회색 테두리만 있는 밋밋한 상자였던 걸 스킬의 "카드=테두리+흰배경 탈피" 원칙대로 정리:
+- 폼 필드 전체를 `bg-gray-50 rounded-2xl p-5` 박스로 묶고(어제 만든 필터 캐러셀·모집 카드와 같은 패턴), 그 안의 입력창은 테두리 없이 흰 배경 + 옅은 그림자(`shadow-sm shadow-black/5`)로 박스 위에 "떠있는" 느낌.
+- 이메일/비밀번호 입력창에 아이콘(`mail-outline`/`lock-closed-outline`) 추가 — 스캔하기 쉽고 밋밋함이 덜함.
+- 로그인 버튼을 폼 박스 안 맨 아래로 이동시켜 "하나의 로그인 카드"처럼 응집.
+- 제목 "로그인" 앞에 작은 amber 점(dot) 추가 — 필터 캐러셀 라벨과 같은 시각 문법으로 브랜드 일관성.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인 — 특히 카드 박스 안 그림자·아이콘이 의도대로 보이는지.
+- [ ] 회원가입 화면(`signup.tsx`)도 같은 패턴으로 정리할지 결정.
+
+---
+
 ## 2026-08-27 (6) — 모집 기술 스택을 가로 캐러셀로 변경
 
 모집 목록 카드·상세 화면의 기술 스택 칩을 `flex-wrap`(줄바꿈) 방식에서 가로 스크롤 캐러셀(`ScrollView horizontal`)로 변경. 상세 화면은 그동안 `techStack` 전체를 줄바꿈으로 다 보여줬던 것도 캐러셀로 통일, 목록 카드는 기존에 4개까지만 자르던 것(`slice(0, 4)`)을 없애고 스크롤로 전부 볼 수 있게 함. 상세 화면엔 "기술 스택" 라벨도 추가(이전엔 라벨 없이 칩만 떠 있었음).
