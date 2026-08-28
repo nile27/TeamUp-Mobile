@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { COLORS } from "@/config/theme";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +22,7 @@ export default function SignupScreen() {
   } = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     mode: "onBlur",
+    defaultValues: { email: "", password: "", nickname: "" },
   });
 
   const onSubmit = async (values: SignupInput) => {
@@ -49,14 +52,13 @@ export default function SignupScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <KeyboardAwareScrollView
+      style={{ flex: 1, backgroundColor: COLORS.canvas }}
+      contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 24 }}
+      keyboardShouldPersistTaps="handled"
+      mode="layout"
+      bottomOffset={16}
     >
-      <ScrollView
-        contentContainerClassName="flex-grow justify-center px-6"
-        keyboardShouldPersistTaps="handled"
-      >
         <Text className="mb-8 text-3xl font-extrabold tracking-tight text-ink">회원가입</Text>
 
         <Text className="mb-1 text-sm text-ink">닉네임</Text>
@@ -135,7 +137,6 @@ export default function SignupScreen() {
         <Link href="/(auth)/login" className="text-center text-sm text-ink-soft">
           이미 계정이 있으신가요? 로그인
         </Link>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
