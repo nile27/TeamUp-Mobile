@@ -134,9 +134,12 @@ export default function SignupScreen() {
           <Text className="font-semibold text-ink">{isSubmitting ? "가입 중..." : "회원가입"}</Text>
         </Button>
 
-        <Link href="/(auth)/login" className="text-center text-sm text-ink-soft">
-          이미 계정이 있으신가요? 로그인
-        </Link>
+        <View className="flex-row items-center justify-center gap-1.5">
+          <Text className="text-sm text-ink-soft">이미 계정이 있으신가요?</Text>
+          <Link href="/(auth)/login">
+            <Text className="text-sm font-semibold text-amber-deep underline">로그인</Text>
+          </Link>
+        </View>
     </KeyboardAwareScrollView>
   );
 }
