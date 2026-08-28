@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-08-28 (14) — 댓글/좋아요 등록 시 pull-to-refresh 스피너가 저절로 뜨던 버그
+
+**증상**: 커뮤니티 댓글 등록 버튼 누르면, 화면 위쪽에 당겨서 새로고침한 것처럼 스피너가 잠깐 뜸.
+
+**원인**: `RefreshControl`의 `refreshing` prop을 React Query의 `isRefetching`에 그대로 연결해뒀음 — `isRefetching`은 "당겨서 새로고침"이 아니라 **어떤 이유로든 백그라운드에서 재조회가 도는 중**이면 전부 `true`가 됨. 댓글 등록 성공 시 `invalidateQueries`로 일어나는 재조회, 좋아요/삭제 뮤테이션의 재조회, 모집 목록의 Realtime 구독으로 인한 재조회까지 전부 이 스피너를 저절로 띄우고 있었음.
+
+**수정**: 커뮤니티 상세/목록, 모집 목록 3곳 전부 — 실제로 사용자가 당겨서 새로고침했을 때만 켜지는 별도 로컬 상태(`isManualRefreshing`)로 분리. `onRefresh`에서 그 상태를 켜고 `refetch()` 끝나면 끔.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+---
+
 ## 2026-08-28 (13) — 모집 목록도 cursor 기반 무한 스크롤로 (웹 API breaking change 반영)
 
 **배경**: 모집(팀 찾기) 목록에 페이지네이션이 아예 없다고 확인했던 것 — 웹이 `GET /api/recruit`를 cursor 기반으로 바꿈(offset 방식은 스크롤 중 새 글이 끼어들면 중복/누락이 생겨서 무한 스크롤엔 cursor가 표준이라는 이유). **Breaking change**: 응답이 배열(`data: [...]`)에서 객체(`data: { recruits, nextCursor }`)로 바뀜.

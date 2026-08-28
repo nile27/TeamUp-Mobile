@@ -21,7 +21,6 @@ export default function RecruitListScreen() {
     isLoading,
     isError,
     refetch,
-    isRefetching,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -30,6 +29,15 @@ export default function RecruitListScreen() {
   // 20개씩 오는 페이지들을 하나의 목록으로 펼침 — 새 페이지를 불러올 때마다
   // 이어붙여서 무한 스크롤처럼 동작(웹이 cursor 기반으로 바꾼 API에 맞춤).
   const recruits = useMemo(() => data?.pages.flatMap((page) => page.recruits) ?? [], [data]);
+
+  // isRefetching을 그대로 쓰면 Realtime 구독으로 인한 백그라운드 재조회에도
+  // pull-to-refresh 스피너가 저절로 떠서, 실제로 당겼을 때만 켜지는 상태로 분리.
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const handleManualRefresh = async () => {
+    setIsManualRefreshing(true);
+    await refetch();
+    setIsManualRefreshing(false);
+  };
 
   const toggleStack = (stack: string) => {
     setStackFilter((prev) =>
@@ -77,7 +85,7 @@ export default function RecruitListScreen() {
           data={recruits}
           keyExtractor={(item) => item.id}
           contentContainerClassName="gap-4 p-4"
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+          refreshControl={<RefreshControl refreshing={isManualRefreshing} onRefresh={handleManualRefresh} />}
           renderItem={({ item }) => <RecruitCard recruit={item} />}
           onEndReachedThreshold={0.4}
           onEndReached={() => {

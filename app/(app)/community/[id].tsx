@@ -22,7 +22,17 @@ import { COLORS } from "@/config/theme";
 export default function CommunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useSession();
-  const { data: post, isLoading, isError, refetch, isRefetching } = useCommunityDetail(id);
+  const { data: post, isLoading, isError, refetch } = useCommunityDetail(id);
+  // React Query의 isRefetching을 그대로 RefreshControl에 연결했더니, 댓글 등록/좋아요
+  // 후 백그라운드 invalidateQueries로 일어나는 재조회에도 pull-to-refresh 스피너가
+  // 저절로 떠버렸음(사용자가 안 당겼는데도) — 실제로 당겨서 새로고침했을 때만 켜지는
+  // 별도 상태로 분리.
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const handleManualRefresh = async () => {
+    setIsManualRefreshing(true);
+    await refetch();
+    setIsManualRefreshing(false);
+  };
   const likeMutation = useToggleCommunityLike(id);
   const commentMutation = useAddCommunityComment(id);
   const deleteMutation = useDeleteCommunityPost();
@@ -117,7 +127,7 @@ export default function CommunityDetailScreen() {
       mode="layout"
       bottomOffset={16}
       keyboardShouldPersistTaps="handled"
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+      refreshControl={<RefreshControl refreshing={isManualRefreshing} onRefresh={handleManualRefresh} />}
     >
       <View className="gap-4 p-4">
         <View className="flex-row items-start justify-between">
