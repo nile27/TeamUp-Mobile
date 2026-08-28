@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { router } from "expo-router";
-import { FlatList, Pressable, RefreshControl, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,20 @@ import type { CommunityPost, CommunityTag } from "@/features/community/types";
 
 export default function CommunityListScreen() {
   const [tagFilter, setTagFilter] = useState<CommunityTag | "ALL">("ALL");
-  const { data, isLoading, isError, refetch, isRefetching } = useCommunityList(
-    tagFilter === "ALL" ? undefined : tagFilter
-  );
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useCommunityList(tagFilter === "ALL" ? undefined : tagFilter);
+
+  // 페이지당 10개씩 오는 응답들(pages)을 하나의 목록으로 펼침 — 새 페이지를
+  // 불러올 때마다 이어붙여서 무한 스크롤처럼 동작.
+  const posts = useMemo(() => data?.pages.flatMap((page) => page.posts) ?? [], [data]);
 
   return (
     <View className="flex-1 bg-white">
@@ -53,19 +64,30 @@ export default function CommunityListScreen() {
         </View>
       )}
 
-      {!isLoading && !isError && data && data.posts.length === 0 && (
+      {!isLoading && !isError && posts.length === 0 && (
         <View className="flex-1 items-center justify-center gap-2 px-6">
           <Text className="text-ink-soft">아직 조건에 맞는 글이 없어요.</Text>
         </View>
       )}
 
-      {!isLoading && !isError && data && data.posts.length > 0 && (
+      {!isLoading && !isError && posts.length > 0 && (
         <FlatList
-          data={data.posts}
+          data={posts}
           keyExtractor={(item) => item.id}
           contentContainerClassName="gap-4 p-4"
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
           renderItem={({ item }) => <CommunityCard post={item} />}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View className="items-center py-4">
+                <ActivityIndicator color={COLORS.amber} />
+              </View>
+            ) : null
+          }
         />
       )}
     </View>

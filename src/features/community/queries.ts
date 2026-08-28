@@ -1,13 +1,16 @@
 import { useEffect, useRef } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchCommunityDetail, fetchCommunityList } from "./api";
 import { supabase } from "@/server/supabase";
 import type { CommunityTag } from "./types";
 
-export function useCommunityList(tag?: CommunityTag, page = 1) {
-  return useQuery({
-    queryKey: ["community-list", tag ?? null, page],
-    queryFn: () => fetchCommunityList(tag, page),
+export function useCommunityList(tag?: CommunityTag) {
+  return useInfiniteQuery({
+    queryKey: ["community-list", tag ?? null],
+    queryFn: ({ pageParam }) => fetchCommunityList(tag, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
   });
 }
 
