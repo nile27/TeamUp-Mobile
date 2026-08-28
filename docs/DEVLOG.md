@@ -4,6 +4,66 @@
 
 ---
 
+## 2026-08-28 (13) — 모집 목록도 cursor 기반 무한 스크롤로 (웹 API breaking change 반영)
+
+**배경**: 모집(팀 찾기) 목록에 페이지네이션이 아예 없다고 확인했던 것 — 웹이 `GET /api/recruit`를 cursor 기반으로 바꿈(offset 방식은 스크롤 중 새 글이 끼어들면 중복/누락이 생겨서 무한 스크롤엔 cursor가 표준이라는 이유). **Breaking change**: 응답이 배열(`data: [...]`)에서 객체(`data: { recruits, nextCursor }`)로 바뀜.
+
+**모바일 반영**
+- `src/features/recruit/types.ts`: `RecruitListResponse = { recruits, nextCursor }` 추가.
+- `src/features/recruit/api.ts`: `fetchRecruitList`가 `cursor` 파라미터를 받아 쿼리스트링에 실어보내고, 새 응답 타입으로 파싱.
+- `src/features/recruit/queries.ts`: `useRecruitList`를 `useQuery` → `useInfiniteQuery`로(커뮤니티와 동일 패턴), `getNextPageParam`은 `nextCursor`.
+- `app/(app)/recruit/index.tsx`: 페이지들을 펼쳐서(`pages.flatMap`) 하나의 목록으로, `FlatList`의 `onEndReached`에서 `fetchNextPage()`, 하단 로딩 스피너.
+- `docs/api-contract.md` 갱신(`GET /api/recruit` 응답 모양 변경 반영).
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인: 모집 목록 스크롤 시 다음 페이지 자동 로드, 기술스택 필터 걸어도 정상 동작하는지.
+- [ ] 커뮤니티도 cursor로 통일할지는 아직 미정(웹이 "강제 아님"이라고 함) — 필요해지면 논의.
+
+---
+
+## 2026-08-28 (12) — 하드웨어 뒤로가기가 탭 이동 이력을 안 타고 바로 앱 종료되던 것 수정
+
+**증상**: 모집→커뮤니티→모집으로 탭 이동한 뒤 폰 하드웨어 뒤로가기를 누르면, 커뮤니티로 안 돌아가고 바로 앱이 꺼짐. `Tabs`의 `backBehavior` 기본값이 탭 이동 이력을 안 타는 쪽이었던 것.
+
+**수정**: `app/(app)/_layout.tsx`의 `Tabs`에 `backBehavior="history"` 추가 — 인스타그램/배민 등 대부분의 탭 기반 앱이 쓰는 방식대로, 실제 이동한 탭 순서를 거슬러 올라가다가 더 갈 곳 없을 때 종료.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+---
+
+## 2026-08-28 (11) — 마이페이지 탭 제거(헤더 아바타로 대체) + 뒤로가기 버튼 판단 방식 수정
+
+**"뒤로가기가 커뮤니티엔 있는데 모집엔 없다"는 실기기 피드백**: `router.canGoBack()`으로 판단했더니 탭 네비게이터 구조 특성상 일관되게 안 나옴(같은 패턴인데 화면마다 결과가 다름 — 정확한 근본 원인은 특정 못 함, 탭 전환 이력이 라우터의 "뒤로가기 가능" 판단에 관여하는 것으로 추정). **판단 방식 자체를 바꿔서 해결**: 화면이 탭 루트인지 하위 화면인지를 `Tabs.Screen options`에 `showBackButton`으로 명시하고, `AppHeader`는 그 값만 보고 뒤로가기 버튼을 그림 — 더 이상 라우터 상태를 추론하지 않음.
+
+**마이페이지를 하단 탭에서 제거**: 헤더에 로그인 사용자 아바타(누르면 마이페이지로 이동)가 생겨서 하단 탭의 마이페이지 아이콘이 중복이라는 의견 — `dashboard` `Tabs.Screen`을 `href: null`로 바꿔 하단 탭 바에서 숨기고, `recruit/[id]`·`community/[id]`와 같은 "하위 화면" 취급으로 `showBackButton: true` 부여. 하단 탭은 이제 모집·커뮤니티 두 개만 남음.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인: 하단 탭에 마이페이지 아이콘이 빠졌는지, 헤더 아바타로 마이페이지 진입되는지, 모집/커뮤니티/마이페이지 상세 화면 전부 뒤로가기 버튼이 일관되게 뜨는지.
+
+---
+
+## 2026-08-28 (10) — 커뮤니티 무한 스크롤 + 커스텀 헤더(브랜드 워드마크)
+
+**커뮤니티 무한 스크롤**: 웹 API(`page`/`totalPages`)는 이미 준비돼 있었는데 화면에서 `page`를 항상 1로만 호출하고 있었음 — `useCommunityList`를 `useInfiniteQuery`로 바꾸고 `FlatList`의 `onEndReached`에서 `fetchNextPage()` 호출, 하단에 로딩 스피너 표시. DB/API 변경 없이 모바일 쪽만으로 해결.
+- **다음 예정**: 커서 기반으로 바꾸기로 사용자와 합의 — 웹 API를 `page`/`totalPages` → `cursor`/`nextCursor`로 바꾸는 핸드오프 프롬프트 전달함(웹 쪽 작업 대기 중). API 응답 모양 바뀌는 대로 모바일도 맞춰서 수정 예정.
+
+**커스텀 헤더(브랜드 워드마크)**: "웹/모바일 같이 쓰는 다른 앱들에 비해 헤더가 개성 없어 보인다"는 피드백(참고 이미지: 링커리어) — 색상은 `DESIGN.md` 원칙(앰버는 버튼/아이콘에만, 내부는 흰 배경 유지)과 안 맞아서 그대로 안 따르고, 대신 React Navigation 기본 헤더(작은 타이틀 텍스트 하나뿐)를 커스텀 헤더로 교체:
+- `src/components/app-header.tsx` 신설 — "TeamUp" 워드마크(앰버 점 + 굵은 타이포) + 화면 제목, 오른쪽엔 로그인 상태면 아바타(누르면 마이페이지 이동)·비로그인이면 로그인 버튼.
+- `app/(app)/_layout.tsx`의 `Tabs` `screenOptions.header`로 교체 연결.
+- **놓칠 뻔한 회귀**: 커스텀 `header`로 바꾸면 React Navigation이 자동으로 넣어주던 뒤로가기 버튼(모집 상세·커뮤니티 글 화면 등)이 같이 사라짐 — `AppHeader`에 `router.canGoBack()`일 때만 보이는 `chevron-back` 버튼을 직접 추가해서 복구.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인: 커뮤니티 스크롤 시 다음 페이지 자동 로드, 헤더 워드마크/아바타, 상세 화면 뒤로가기 버튼 정상 동작.
+- [ ] 웹 쪽 커서 페이지네이션 작업 완료되면 모바일 `fetchCommunityList`/`useCommunityList` 반영.
+
+---
+
 ## 2026-08-28 (9) — 캐러셀 페이드가 첫/마지막 칩 글자를 가리던 버그
 
 **실기기 스크린샷 확인**: 모집 카드 기술 스택 캐러셀에서 첫 번째 칩("Vue.js", "TypeScript")의 앞글자가 흰색 페이드에 잘려 보임. `HorizontalCarousel`의 좌우 페이드 오버레이가 스크롤 위치와 무관하게 항상 떠 있어서, 더 스크롤할 콘텐츠가 없는 맨 처음/맨 끝에서도 페이드가 첫/마지막 칩을 덮고 있었던 것.
