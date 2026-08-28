@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchRecruitDetail, fetchRecruitList } from "./api";
 import { supabase } from "@/server/supabase";
 
 export function useRecruitList(techStackFilter?: string[]) {
   const queryClient = useQueryClient();
-  const query = useQuery({
+  const query = useInfiniteQuery({
     queryKey: ["recruit-list", techStackFilter ?? []],
-    queryFn: () => fetchRecruitList(techStackFilter),
+    queryFn: ({ pageParam }) => fetchRecruitList(techStackFilter, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
 
   // Supabase Realtime은 채널을 이름(topic)으로 관리해서, 같은 이름의 채널이

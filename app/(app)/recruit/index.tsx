@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { router } from "expo-router";
-import { FlatList, Pressable, RefreshControl, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,15 +9,27 @@ import { FilterCarousel } from "@/components/filter-carousel";
 import { useRecruitList } from "@/features/recruit/queries";
 import { TECH_STACK_OPTIONS } from "@/config/tech-stack";
 import { RECRUIT_TYPE_LABEL } from "@/config/labels";
+import { COLORS } from "@/config/theme";
 import type { Recruit } from "@/features/recruit/types";
 
 const FILTER_CHIPS = TECH_STACK_OPTIONS;
 
 export default function RecruitListScreen() {
   const [stackFilter, setStackFilter] = useState<string[]>([]);
-  const { data, isLoading, isError, refetch, isRefetching } = useRecruitList(
-    stackFilter.length ? stackFilter : undefined
-  );
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useRecruitList(stackFilter.length ? stackFilter : undefined);
+
+  // 20개씩 오는 페이지들을 하나의 목록으로 펼침 — 새 페이지를 불러올 때마다
+  // 이어붙여서 무한 스크롤처럼 동작(웹이 cursor 기반으로 바꾼 API에 맞춤).
+  const recruits = useMemo(() => data?.pages.flatMap((page) => page.recruits) ?? [], [data]);
 
   const toggleStack = (stack: string) => {
     setStackFilter((prev) =>
@@ -54,19 +66,30 @@ export default function RecruitListScreen() {
         </View>
       )}
 
-      {!isLoading && !isError && data && data.length === 0 && (
+      {!isLoading && !isError && recruits.length === 0 && (
         <View className="flex-1 items-center justify-center gap-2 px-6">
           <Text className="text-ink-soft">아직 조건에 맞는 모집이 없어요.</Text>
         </View>
       )}
 
-      {!isLoading && !isError && data && data.length > 0 && (
+      {!isLoading && !isError && recruits.length > 0 && (
         <FlatList
-          data={data}
+          data={recruits}
           keyExtractor={(item) => item.id}
           contentContainerClassName="gap-4 p-4"
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
           renderItem={({ item }) => <RecruitCard recruit={item} />}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View className="items-center py-4">
+                <ActivityIndicator color={COLORS.amber} />
+              </View>
+            ) : null
+          }
         />
       )}
     </View>

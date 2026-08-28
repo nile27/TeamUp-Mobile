@@ -1,10 +1,13 @@
 import { apiDelete, apiGet, apiPost } from "@/lib/api-client";
-import type { Application, Recruit } from "./types";
+import type { Application, Recruit, RecruitListResponse } from "./types";
 import type { CreateRecruitInput } from "@/schema/recruit";
 
-export function fetchRecruitList(techStackFilter?: string[]) {
-  const query = techStackFilter?.length ? `?stack=${techStackFilter.join(",")}` : "";
-  return apiGet<Recruit[]>(`/api/recruit${query}`);
+export function fetchRecruitList(techStackFilter?: string[], cursor?: string) {
+  const params = new URLSearchParams();
+  if (techStackFilter?.length) params.set("stack", techStackFilter.join(","));
+  if (cursor) params.set("cursor", cursor);
+  const query = params.toString();
+  return apiGet<RecruitListResponse>(`/api/recruit${query ? `?${query}` : ""}`);
 }
 
 export function fetchRecruitDetail(id: string) {

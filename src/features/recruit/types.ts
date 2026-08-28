@@ -26,6 +26,12 @@ export type Recruit = {
   alreadyApplied: boolean;
 };
 
+export type RecruitListResponse = {
+  recruits: Recruit[];
+  // null이면 더 불러올 게 없음.
+  nextCursor: string | null;
+};
+
 export type Application = {
   id: string;
   recruitId: string;
