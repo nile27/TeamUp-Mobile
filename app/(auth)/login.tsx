@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, router } from "expo-router";
-import { Linking, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Ionicons } from "@expo/vector-icons";
 import { Text } from "@/components/ui/text";
@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loginSchema, type LoginInput } from "@/schema/auth";
 import { loginWithPassword } from "@/features/auth/api";
-import { API_BASE_URL } from "@/config/env";
 import { COLORS } from "@/config/theme";
 
 export default function LoginScreen() {
@@ -55,7 +54,7 @@ export default function LoginScreen() {
             <View className="h-2 w-2 rounded-full bg-amber" />
             <Text className="text-3xl font-extrabold tracking-tight text-ink">로그인</Text>
           </View>
-          <Pressable onPress={() => Linking.openURL(API_BASE_URL)} className="self-start">
+          <Pressable onPress={() => router.push("/(auth)/landing")} className="self-start">
             <Text className="text-sm text-ink-soft underline">TeamUp이 궁금하다면? 서비스 소개 보기</Text>
           </Pressable>
         </View>
