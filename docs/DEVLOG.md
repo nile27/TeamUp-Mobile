@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-09-01 (2) — 지원자 확인 화면 신설 (`fix/own-recruit-apply-and-applicants` 브랜치)
+
+**배경**: 웹 세션이 핸드오프 요청(본인 지원 차단 서버 검증 + 지원자 확인 REST API 신설) 처리 완료 후 프로덕션 배포까지 끝냄(`docs/local/from-web-applicants-api-response.md`). 확정된 API로 모바일에 지원자 확인 기능 신규 구현.
+
+**추가한 것**
+- `src/lib/api-client.ts`: `apiPatch` 헬퍼 추가.
+- `src/features/recruit/types.ts`: `Applicant`/`ApplicantApplication`/`RecruitApplicants` 타입 추가.
+- `src/features/recruit/api.ts`: `fetchApplicants`(`GET /api/recruit/[id]/applicants`), `updateApplicationStatus`(`PATCH /api/applications/[id]/status`) 추가.
+- `src/features/recruit/queries.ts`: `useApplicants` 쿼리 추가.
+- `src/features/recruit/mutations.ts`: `useUpdateApplicationStatus` 뮤테이션 추가(성공 시 지원자 목록 + 마이페이지 쿼리 무효화).
+- `app/(app)/recruit/[id]/applicants.tsx` 신설 — 지원자 카드 리스트(아바타/닉네임/자기소개/포트폴리오/지원 메시지) + `PENDING` 상태일 때만 수락/거절 버튼. 웹의 `/recruit/[id]/applicants` 페이지를 참고해 RN 컴포넌트로 새로 구성(마크다운 렌더링 라이브러리는 없어서 포트폴리오·자기소개는 평문 그대로 표시).
+- `app/(app)/_layout.tsx`: `recruit/[id]/applicants` 라우트를 하위 화면(`showBackButton: true`, 탭바 노출 안 함)으로 등록.
+- `app/(app)/recruit/[id].tsx`: 작성자 본인일 때 지원 버튼을 "지원자 확인하기 (N)"으로 바꾸고 누르면 위 화면으로 이동하도록 변경(이전엔 그냥 비활성화만 해뒀던 것 — 웹의 "지원자 확인하기" 버튼과 동작 통일).
+- `docs/api-contract.md`: `GET /api/recruit/[id]/applicants`, `PATCH /api/applications/[id]/status`, `POST /api/applications`의 `404`/본인 지원 차단 `400` 케이스 반영.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 실기기에서 확인: 내 모집글 상세 → "지원자 확인하기" 진입, 수락/거절 버튼 동작, 상태 배지 갱신, pull-to-refresh.
+- [ ] 확인 끝나면 `dev` 머지 + `eas update --channel internal`로 OTA 반영(네이티브 모듈 변경 없어 재빌드 불필요).
+
+---
+
 ## 2026-09-01 — 내 모집글에 내가 지원 가능하던 버그 수정 (`fix/own-recruit-apply-and-applicants` 브랜치)
 
 **신고된 증상**: 본인이 작성한 모집글 상세 화면에서 "지원하기" 버튼이 그대로 활성화돼 있어 자기 글에 지원이 가능했음. 추가로 모바일엔 작성자가 지원 현황(지원자 목록)을 확인할 방법이 아예 없다는 지적도 있었음.
