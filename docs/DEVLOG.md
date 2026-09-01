@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-09-01 (3) — 앱 아이콘을 TeamUp 브랜드 로고로 교체
+
+**배경**: Expo 기본 템플릿 아이콘(파란 "A" 로고)을 그대로 쓰고 있던 것을 실제 브랜드 로고로 교체.
+
+**적용**: 웹 레포의 `public/brand/logo-symbol.png`("Ti" 심볼, 앱 헤더 워드마크와 같은 로고, 원본 180x180)를 흰 배경 위에 올려서 필요한 사이즈로 생성.
+- `assets/icon.png`(1024x1024, 흰 배경, iOS/기본 아이콘)
+- `assets/android-icon-foreground.png`(512x512, 투명 배경, adaptive icon 전경)
+- `assets/android-icon-background.png`(512x512, 흰색 단색, adaptive icon 배경)
+- `assets/android-icon-monochrome.png`(432x432, 검정 실루엣, 투명 배경, Android 13+ 테마 아이콘용)
+- `assets/favicon.png`(48x48, 흰 배경, 웹 탭 아이콘)
+- `app.json`의 `android.adaptiveIcon.backgroundColor`를 기존 연한 파랑(`#E6F4FE`, 기본 템플릿 값)에서 흰색(`#FFFFFF`)으로 변경
+
+원본이 180x180이라 1024까지 업스케일했는데, 로고 자체가 단순한 플랫 컬러 도형이라 확대해도 경계가 깨끗하게 유지됨(고해상도 원본 벡터는 없음 — 나중에 벡터본이 생기면 교체 권장).
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**주의**: 앱 아이콘은 네이티브 리소스라 OTA(`eas update`)로는 반영 안 되고 새 `eas build` 필요.
+
+---
+
 ## 2026-09-01 (2) — 지원자 확인 화면 신설 (`fix/own-recruit-apply-and-applicants` 브랜치)
 
 **배경**: 웹 세션이 핸드오프 요청(본인 지원 차단 서버 검증 + 지원자 확인 REST API 신설) 처리 완료 후 프로덕션 배포까지 끝냄(`docs/local/from-web-applicants-api-response.md`). 확정된 API로 모바일에 지원자 확인 기능 신규 구현.
