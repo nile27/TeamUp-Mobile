@@ -102,8 +102,64 @@ Authorization: Bearer <supabase access token>
 
 **응답**
 - `201` `{ "data": <application> }`
-- `400` 검증 실패 또는 중복 지원(`@@unique` 위반)
+- `400` 검증 실패, 중복 지원(`@@unique` 위반), 또는 **본인이 등록한 모집글에 지원**(`"본인이 등록한 모집글에는 지원할 수 없습니다."`)
 - `401` 미인증
+- `404` `recruitId`에 해당하는 모집을 찾을 수 없음
+
+---
+
+## `GET /api/recruit/[id]/applicants`
+
+지원자 목록 조회. **모집 작성자 본인만**, 인증 필요.
+
+**응답**
+- `200`
+```json
+{
+  "data": {
+    "id": "recruit-id",
+    "title": "...",
+    "applications": [
+      {
+        "id": "application-id",
+        "recruitId": "...",
+        "message": "...",
+        "status": "PENDING",
+        "createdAt": "...",
+        "applicant": {
+          "id": "...",
+          "nickname": "...",
+          "avatarUrl": null,
+          "bio": "...",
+          "email": "...",
+          "portfolio": "..."
+        }
+      }
+    ]
+  }
+}
+```
+- `401` 미인증
+- `403` 작성자 아님
+- `404` 모집을 찾을 수 없음
+
+---
+
+## `PATCH /api/applications/[id]/status`
+
+지원 수락/거절. **해당 모집 작성자 본인만**, 인증 필요.
+
+**요청 바디**
+```json
+{ "status": "ACCEPTED" }
+```
+
+**응답**
+- `200` `{ "data": { "id": "...", "status": "ACCEPTED" } }`
+- `400` `status`가 `ACCEPTED`/`REJECTED`가 아님
+- `401` 미인증
+- `403` 작성자 아님
+- `404` 지원 내역을 찾을 수 없음
 
 ---
 

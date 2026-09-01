@@ -76,6 +76,10 @@ export default function RecruitDetailScreen() {
   };
 
   const handleApply = () => {
+    if (isAuthor) {
+      router.push(`/(app)/recruit/${id}/applicants`);
+      return;
+    }
     if (!session) {
       router.push("/(auth)/login");
       return;
@@ -160,17 +164,19 @@ export default function RecruitDetailScreen() {
         {applyError && <Text className="mb-2 text-sm text-red-500">{applyError}</Text>}
         <Button
           onPress={handleApply}
-          disabled={applied || applyMutation.isPending}
+          disabled={!isAuthor && (applied || applyMutation.isPending)}
           className="items-center rounded-lg bg-amber py-3 shadow-none disabled:opacity-50"
         >
           <Text className="font-semibold text-ink">
-            {applied
-              ? "지원 완료"
-              : applyMutation.isPending
-                ? "지원 중..."
-                : session
-                  ? "지원하기"
-                  : "로그인하고 지원하기"}
+            {isAuthor
+              ? `지원자 확인하기 (${recruit._count.applications})`
+              : applied
+                ? "지원 완료"
+                : applyMutation.isPending
+                  ? "지원 중..."
+                  : session
+                    ? "지원하기"
+                    : "로그인하고 지원하기"}
           </Text>
         </Button>
       </View>

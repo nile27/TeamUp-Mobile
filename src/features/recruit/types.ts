@@ -40,3 +40,28 @@ export type Application = {
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
 };
+
+export type Applicant = {
+  id: string;
+  nickname: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  email: string;
+  portfolio: string | null;
+};
+
+export type ApplicantApplication = {
+  id: string;
+  recruitId: string;
+  message: string | null;
+  status: "PENDING" | "ACCEPTED" | "REJECTED";
+  createdAt: string;
+  applicant: Applicant;
+};
+
+// GET /api/recruit/[id]/applicants 응답 — 모집 작성자 전용.
+export type RecruitApplicants = {
+  id: string;
+  title: string;
+  applications: ApplicantApplication[];
+};

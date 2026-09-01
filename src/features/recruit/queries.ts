@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchRecruitDetail, fetchRecruitList } from "./api";
+import { fetchApplicants, fetchRecruitDetail, fetchRecruitList } from "./api";
 import { supabase } from "@/server/supabase";
 
 export function useRecruitList(techStackFilter?: string[]) {
@@ -47,5 +47,13 @@ export function useRecruitDetail(id: string) {
     queryKey: ["recruit-detail", id],
     queryFn: () => fetchRecruitDetail(id),
     enabled: !!id,
+  });
+}
+
+export function useApplicants(recruitId: string) {
+  return useQuery({
+    queryKey: ["recruit-applicants", recruitId],
+    queryFn: () => fetchApplicants(recruitId),
+    enabled: !!recruitId,
   });
 }

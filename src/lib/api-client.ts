@@ -42,6 +42,15 @@ export async function apiDelete<T>(path: string): Promise<T> {
   return handleResponse<T>(res, "DELETE", path);
 }
 
+export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
+    body: JSON.stringify(body),
+  });
+  return handleResponse<T>(res, "PATCH", path);
+}
+
 async function handleResponse<T>(res: Response, method: string, path: string): Promise<T> {
   let json: { data?: T; error?: string; fieldErrors?: Record<string, string[]> };
   try {

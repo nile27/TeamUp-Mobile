@@ -1,5 +1,5 @@
-import { apiDelete, apiGet, apiPost } from "@/lib/api-client";
-import type { Application, Recruit, RecruitListResponse } from "./types";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api-client";
+import type { Application, Recruit, RecruitApplicants, RecruitListResponse } from "./types";
 import type { CreateRecruitInput } from "@/schema/recruit";
 
 export function fetchRecruitList(techStackFilter?: string[], cursor?: string) {
@@ -24,4 +24,15 @@ export function applyToRecruit(recruitId: string, message?: string) {
 
 export function deleteRecruit(id: string) {
   return apiDelete<{ deleted: boolean }>(`/api/recruit/${id}`);
+}
+
+export function fetchApplicants(recruitId: string) {
+  return apiGet<RecruitApplicants>(`/api/recruit/${recruitId}/applicants`);
+}
+
+export function updateApplicationStatus(applicationId: string, status: "ACCEPTED" | "REJECTED") {
+  return apiPatch<{ id: string; status: "ACCEPTED" | "REJECTED" }>(
+    `/api/applications/${applicationId}/status`,
+    { status }
+  );
 }

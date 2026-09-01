@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { applyToRecruit, deleteRecruit } from "./api";
+import { applyToRecruit, deleteRecruit, updateApplicationStatus } from "./api";
 
 export function useApplyToRecruit(recruitId: string) {
   const queryClient = useQueryClient();
@@ -7,6 +7,18 @@ export function useApplyToRecruit(recruitId: string) {
     mutationFn: (message?: string) => applyToRecruit(recruitId, message),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recruit-detail", recruitId] });
+    },
+  });
+}
+
+export function useUpdateApplicationStatus(recruitId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ applicationId, status }: { applicationId: string; status: "ACCEPTED" | "REJECTED" }) =>
+      updateApplicationStatus(applicationId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recruit-applicants", recruitId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }

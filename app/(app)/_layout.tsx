@@ -57,6 +57,10 @@ export default function AppLayout() {
         options={{ href: null, title: "모집 상세", showBackButton: true } as never}
       />
       <Tabs.Screen
+        name="recruit/[id]/applicants"
+        options={{ href: null, title: "지원자 확인", showBackButton: true } as never}
+      />
+      <Tabs.Screen
         name="community/index"
         options={{
           title: "커뮤니티",
