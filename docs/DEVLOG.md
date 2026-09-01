@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-09-01 — 내 모집글에 내가 지원 가능하던 버그 수정 (`fix/own-recruit-apply-and-applicants` 브랜치)
+
+**신고된 증상**: 본인이 작성한 모집글 상세 화면에서 "지원하기" 버튼이 그대로 활성화돼 있어 자기 글에 지원이 가능했음. 추가로 모바일엔 작성자가 지원 현황(지원자 목록)을 확인할 방법이 아예 없다는 지적도 있었음.
+
+**원인**: `app/(app)/recruit/[id].tsx`에 삭제 버튼 노출용으로 `isAuthor`를 계산해두고도 정작 지원하기 버튼의 `disabled`/`handleApply` 로직에는 반영하지 않았음. 웹 소스(`~/Desktop/TeamUp`)를 확인해보니 `POST /api/applications` 서버 쪽에도 작성자 본인 지원을 막는 검증이 없고, 웹은 프론트에서 작성자일 때 지원 폼 자체를 안 그리는 방식(`isAuthor` 분기)으로만 막고 있었음 — 즉 서버 API 자체의 인가 허점이고, 모바일은 그 프론트 가림막마저 빠져 있었던 것.
+
+**수정(모바일 범위만)**: `isAuthor`일 때 지원 버튼을 비활성화하고 "내가 등록한 모집글이에요 (지원자 N명)"으로 문구를 바꿈. `handleApply`에도 `isAuthor` 조기 반환 추가.
+
+**지원 현황(지원자 목록) 확인 기능은 이번에 보류**: 웹은 `/recruit/[id]/applicants` 페이지(지원자 목록 + 수락/거절)가 있지만 Server Component/Server Action으로만 구현돼 있어 모바일이 호출할 REST API가 없음(`getRecruitForApplicants`/`updateApplicationStatus` 둘 다 직접 Prisma 호출). 모바일 혼자 구현 불가 — 웹 쪽에 REST API 신설이 선행돼야 함(사용자 확인 후 이번엔 범위에서 제외, 필요해지면 웹에 핸드오프 프롬프트 전달 예정).
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+**다음 할 일**:
+- [ ] 웹 API에 `GET /api/recruit/[id]/applicants`(작성자 전용), 지원 수락/거절 엔드포인트 신설 요청 — 완료되면 모바일에 지원 현황 화면 추가.
+- [ ] 웹 `POST /api/applications`에도 작성자 본인 지원을 막는 서버 검증 추가를 웹 세션에 별도로 알릴 것(현재는 REST API 레벨의 인가 허점).
+
+---
+
 ## 2026-08-28 (19) — EAS internal 빌드 배포 + GitHub Release 공유 + 환경변수 크래시 수정
 
 **배경**: 개발 파일럿을 여기서 일단 마무리하기로 하고, 시연 가능한 APK를 GitHub Release로 공유하기로 함.

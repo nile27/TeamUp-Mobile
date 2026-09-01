@@ -80,6 +80,7 @@ export default function RecruitDetailScreen() {
       router.push("/(auth)/login");
       return;
     }
+    if (isAuthor) return;
     setApplyError(null);
     applyMutation.mutate(undefined, {
       onError: (error) => {
@@ -160,17 +161,19 @@ export default function RecruitDetailScreen() {
         {applyError && <Text className="mb-2 text-sm text-red-500">{applyError}</Text>}
         <Button
           onPress={handleApply}
-          disabled={applied || applyMutation.isPending}
+          disabled={isAuthor || applied || applyMutation.isPending}
           className="items-center rounded-lg bg-amber py-3 shadow-none disabled:opacity-50"
         >
           <Text className="font-semibold text-ink">
-            {applied
-              ? "지원 완료"
-              : applyMutation.isPending
-                ? "지원 중..."
-                : session
-                  ? "지원하기"
-                  : "로그인하고 지원하기"}
+            {isAuthor
+              ? `내가 등록한 모집글이에요 (지원자 ${recruit._count.applications}명)`
+              : applied
+                ? "지원 완료"
+                : applyMutation.isPending
+                  ? "지원 중..."
+                  : session
+                    ? "지원하기"
+                    : "로그인하고 지원하기"}
           </Text>
         </Button>
       </View>
