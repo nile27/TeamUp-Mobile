@@ -181,7 +181,7 @@ export default function RecruitDetailScreen() {
         <Button
           onPress={handleApply}
           disabled={!isAuthor && (applied || applyMutation.isPending)}
-          className="items-center rounded-lg bg-amber py-3 shadow-none disabled:opacity-50"
+          className="items-center rounded-lg bg-amber h-auto py-3 shadow-none disabled:opacity-50"
         >
           <Text className="font-semibold text-ink">
             {isAuthor

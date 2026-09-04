@@ -74,14 +74,14 @@ export default function LandingScreen() {
           </Text>
           <View className="mt-2 flex-row gap-3">
             <Button
-              className="flex-1 items-center rounded-lg bg-amber py-3 shadow-none active:opacity-80"
+              className="flex-1 items-center rounded-lg bg-amber h-auto py-3 shadow-none active:opacity-80"
               onPress={() => router.push("/(auth)/signup")}
             >
               <Text className="font-semibold text-ink">시작하기</Text>
             </Button>
             <Button
               variant="outline"
-              className="flex-1 items-center rounded-lg border-gray-300 py-3 shadow-none active:opacity-70"
+              className="flex-1 items-center rounded-lg border-gray-300 h-auto py-3 shadow-none active:opacity-70"
               onPress={() => router.replace("/(app)/recruit")}
             >
               <Text className="font-semibold text-ink">둘러보기</Text>
@@ -171,7 +171,7 @@ export default function LandingScreen() {
             망설이지 마세요. 완벽한 계획보다 빠른 실행이 프로젝트의 첫 걸음입니다.
           </Text>
           <Button
-            className="mt-2 items-center rounded-lg bg-amber py-3 shadow-none active:opacity-80"
+            className="mt-2 items-center rounded-lg bg-amber h-auto py-3 shadow-none active:opacity-80"
             onPress={() => router.push("/(auth)/signup")}
           >
             <Text className="font-semibold text-ink">프로젝트 시작하기</Text>

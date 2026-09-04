@@ -124,7 +124,7 @@ export default function LoginScreen() {
           {serverError && <Text className="text-sm text-red-500">{serverError}</Text>}
 
           <Button
-            className="items-center rounded-lg bg-amber py-3 shadow-none disabled:opacity-50"
+            className="items-center rounded-lg bg-amber h-auto py-3 shadow-none disabled:opacity-50"
             onPress={handleSubmit(onSubmit)}
             disabled={isSubmitting}
           >

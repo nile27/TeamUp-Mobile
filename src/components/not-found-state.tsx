@@ -28,7 +28,7 @@ export function NotFoundState({
         <Text className="text-xl font-bold tracking-tight text-ink">{title}</Text>
         <Text className="text-center text-sm leading-5 text-ink-soft">{description}</Text>
       </View>
-      <Button onPress={onAction} className="items-center rounded-lg bg-amber px-5 py-3 shadow-none">
+      <Button onPress={onAction} className="items-center rounded-lg bg-amber px-5 h-auto py-3 shadow-none">
         <Text className="font-semibold text-ink">{actionLabel}</Text>
       </Button>
     </View>

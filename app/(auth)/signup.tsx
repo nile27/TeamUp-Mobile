@@ -127,7 +127,7 @@ export default function SignupScreen() {
         {serverError && <Text className="mb-3 text-sm text-red-500">{serverError}</Text>}
 
         <Button
-          className="mb-4 items-center rounded-lg bg-amber py-3 shadow-none disabled:opacity-50"
+          className="mb-4 items-center rounded-lg bg-amber h-auto py-3 shadow-none disabled:opacity-50"
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
