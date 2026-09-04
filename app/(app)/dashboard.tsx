@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/skeleton";
 import { useSession } from "@/features/auth/use-session";
 import { useDashboard } from "@/features/dashboard/queries";
 import { useDeleteRecruit } from "@/features/recruit/mutations";
@@ -64,10 +65,10 @@ export default function DashboardScreen() {
   if (isSessionLoading || (session && isLoading)) {
     return (
       <View className="flex-1 gap-4 bg-canvas-soft p-4">
-        <View className="h-8 w-32 rounded-md bg-gray-100" />
-        <View className="h-16 w-full rounded-xl bg-gray-100" />
-        <View className="h-16 w-full rounded-xl bg-gray-100" />
-        <View className="h-16 w-full rounded-xl bg-gray-100" />
+        <Skeleton className="h-8 w-32 rounded-md" />
+        <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-xl" />
       </View>
     );
   }

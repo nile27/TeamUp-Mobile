@@ -7,6 +7,7 @@ import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/avatar";
+import { Skeleton } from "@/components/skeleton";
 import { useCommunityList } from "@/features/community/queries";
 import { COMMUNITY_TAG_FILTERS, COMMUNITY_TAG_LABEL } from "@/config/labels";
 import { COLORS } from "@/config/theme";
@@ -59,7 +60,7 @@ export default function CommunityListScreen() {
       {isLoading && (
         <View className="flex-1 items-center justify-center gap-3 px-6">
           {[1, 2, 3].map((i) => (
-            <View key={i} className="h-20 w-full rounded-xl bg-gray-100" />
+            <Skeleton key={i} className="h-20 w-full rounded-xl" />
           ))}
         </View>
       )}

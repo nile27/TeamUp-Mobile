@@ -5,6 +5,7 @@ import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/avatar";
+import { Skeleton } from "@/components/skeleton";
 import { useApplicants } from "@/features/recruit/queries";
 import { useUpdateApplicationStatus } from "@/features/recruit/mutations";
 import type { ApplicantApplication } from "@/features/recruit/types";
@@ -34,9 +35,9 @@ export default function RecruitApplicantsScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 gap-3 bg-canvas-soft p-4">
-        <View className="h-24 w-full rounded-2xl bg-gray-100" />
-        <View className="h-24 w-full rounded-2xl bg-gray-100" />
-        <View className="h-24 w-full rounded-2xl bg-gray-100" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
       </View>
     );
   }

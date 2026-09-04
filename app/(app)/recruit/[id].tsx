@@ -5,6 +5,8 @@ import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/avatar";
 import { HorizontalCarousel } from "@/components/horizontal-carousel";
+import { Skeleton } from "@/components/skeleton";
+import { NotFoundState } from "@/components/not-found-state";
 import { useSession } from "@/features/auth/use-session";
 import { useRecruitDetail } from "@/features/recruit/queries";
 import { useApplyToRecruit, useDeleteRecruit } from "@/features/recruit/mutations";
@@ -24,7 +26,7 @@ const RECRUIT_TYPE_BADGE_TEXT: Record<"DEV" | "PLAN", string> = {
 export default function RecruitDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useSession();
-  const { data: recruit, isLoading, isError, refetch } = useRecruitDetail(id);
+  const { data: recruit, isLoading, isError, error, refetch } = useRecruitDetail(id);
   const applyMutation = useApplyToRecruit(id);
   const deleteMutation = useDeleteRecruit();
   const [applyError, setApplyError] = useState<string | null>(null);
@@ -33,12 +35,23 @@ export default function RecruitDetailScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 gap-4 bg-canvas-soft p-4">
-        <View className="h-6 w-20 rounded-md bg-gray-100" />
-        <View className="h-8 w-3/4 rounded-md bg-gray-100" />
-        <View className="h-4 w-1/2 rounded-md bg-gray-100" />
-        <View className="h-24 w-full rounded-xl bg-gray-100" />
-        <View className="h-24 w-full rounded-xl bg-gray-100" />
+        <Skeleton className="h-6 w-20 rounded-md" />
+        <Skeleton className="h-8 w-3/4 rounded-md" />
+        <Skeleton className="h-4 w-1/2 rounded-md" />
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-xl" />
       </View>
+    );
+  }
+
+  if (error instanceof ApiError && error.status === 404) {
+    return (
+      <NotFoundState
+        title="삭제되었거나 없는 모집글이에요"
+        description="이미 삭제됐거나 처음부터 존재하지 않는 모집글일 수 있어요."
+        actionLabel="모집 목록으로 돌아가기"
+        onAction={() => router.replace("/(app)/recruit")}
+      />
     );
   }
 

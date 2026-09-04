@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { HorizontalCarousel } from "@/components/horizontal-carousel";
 import { FilterCarousel } from "@/components/filter-carousel";
+import { Skeleton } from "@/components/skeleton";
 import { useRecruitList } from "@/features/recruit/queries";
 import { TECH_STACK_OPTIONS } from "@/config/tech-stack";
 import { RECRUIT_TYPE_LABEL } from "@/config/labels";
@@ -61,7 +62,7 @@ export default function RecruitListScreen() {
       {isLoading && (
         <View className="flex-1 items-center justify-center gap-3 px-6">
           {[1, 2, 3].map((i) => (
-            <View key={i} className="h-24 w-full rounded-xl bg-gray-100" />
+            <Skeleton key={i} className="h-24 w-full rounded-xl" />
           ))}
         </View>
       )}

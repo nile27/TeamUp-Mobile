@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/avatar";
+import { Skeleton } from "@/components/skeleton";
+import { NotFoundState } from "@/components/not-found-state";
 import { useSession } from "@/features/auth/use-session";
 import { useCommunityDetail } from "@/features/community/queries";
 import {
@@ -22,7 +24,7 @@ import { COLORS } from "@/config/theme";
 export default function CommunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useSession();
-  const { data: post, isLoading, isError, refetch } = useCommunityDetail(id);
+  const { data: post, isLoading, isError, error, refetch } = useCommunityDetail(id);
   // React Query의 isRefetching을 그대로 RefreshControl에 연결했더니, 댓글 등록/좋아요
   // 후 백그라운드 invalidateQueries로 일어나는 재조회에도 pull-to-refresh 스피너가
   // 저절로 떠버렸음(사용자가 안 당겼는데도) — 실제로 당겨서 새로고침했을 때만 켜지는
@@ -47,11 +49,22 @@ export default function CommunityDetailScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 gap-4 bg-canvas-soft p-4">
-        <View className="h-6 w-20 rounded-md bg-gray-100" />
-        <View className="h-8 w-3/4 rounded-md bg-gray-100" />
-        <View className="h-4 w-1/2 rounded-md bg-gray-100" />
-        <View className="h-16 w-full rounded-xl bg-gray-100" />
+        <Skeleton className="h-6 w-20 rounded-md" />
+        <Skeleton className="h-8 w-3/4 rounded-md" />
+        <Skeleton className="h-4 w-1/2 rounded-md" />
+        <Skeleton className="h-16 w-full rounded-xl" />
       </View>
+    );
+  }
+
+  if (error instanceof ApiError && error.status === 404) {
+    return (
+      <NotFoundState
+        title="삭제되었거나 없는 글이에요"
+        description="이미 삭제됐거나 처음부터 존재하지 않는 커뮤니티 글일 수 있어요."
+        actionLabel="커뮤니티로 돌아가기"
+        onAction={() => router.replace("/(app)/community")}
+      />
     );
   }
 
