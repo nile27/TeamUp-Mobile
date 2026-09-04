@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { router } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, View } from "react-native";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -46,7 +47,7 @@ export default function RecruitListScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-canvas-soft">
       <View className="px-4 py-3">
         <FilterCarousel
           label="기술 스택 필터링"
@@ -86,7 +87,7 @@ export default function RecruitListScreen() {
           keyExtractor={(item) => item.id}
           contentContainerClassName="gap-4 p-4"
           refreshControl={<RefreshControl refreshing={isManualRefreshing} onRefresh={handleManualRefresh} />}
-          renderItem={({ item }) => <RecruitCard recruit={item} />}
+          renderItem={({ item, index }) => <RecruitCard recruit={item} index={index} />}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -114,32 +115,36 @@ const RECRUIT_TYPE_BADGE_TEXT: Record<Recruit["type"], string> = {
   PLAN: "text-emerald-700",
 };
 
-function RecruitCard({ recruit }: { recruit: Recruit }) {
+function RecruitCard({ recruit, index }: { recruit: Recruit; index: number }) {
   return (
-    <Pressable onPress={() => router.push(`/(app)/recruit/${recruit.id}`)}>
-      {/* 테두리+흰배경 뿐인 카드 대신, 옅은 배경 톤으로만 카드 경계를 표현 */}
-      <Card className="gap-2 rounded-2xl border-0 bg-gray-50 p-5 shadow-none">
-        <View
-          className={`self-start rounded-md px-2 py-1 ${RECRUIT_TYPE_BADGE[recruit.type]}`}
-        >
-          <Text className={`text-xs font-semibold ${RECRUIT_TYPE_BADGE_TEXT[recruit.type]}`}>
-            {RECRUIT_TYPE_LABEL[recruit.type]}
+    // minimalist-ui 파일럿: 배경 톤으로만 경계 표현하던 카드를 "문서형" 스타일로 —
+    // 흰 배경 + 옅은 1px 테두리, 그림자 없음. 리스트에 순서대로 나타나는 느낌을 주려고
+    // 인덱스만큼 지연시킨 페이드+슬라이드업 진입 애니메이션(reanimated) 적용.
+    <Animated.View entering={FadeInUp.delay(Math.min(index, 8) * 60).duration(360)}>
+      <Pressable onPress={() => router.push(`/(app)/recruit/${recruit.id}`)}>
+        <Card className="gap-2 rounded-xl border border-gray-200 bg-white p-5 shadow-none">
+          <View
+            className={`self-start rounded-md px-2 py-1 ${RECRUIT_TYPE_BADGE[recruit.type]}`}
+          >
+            <Text className={`text-xs font-semibold ${RECRUIT_TYPE_BADGE_TEXT[recruit.type]}`}>
+              {RECRUIT_TYPE_LABEL[recruit.type]}
+            </Text>
+          </View>
+          <Text className="text-base font-bold tracking-tight text-ink" numberOfLines={1}>
+            {recruit.title}
           </Text>
-        </View>
-        <Text className="text-base font-semibold text-ink" numberOfLines={1}>
-          {recruit.title}
-        </Text>
-        <Text className="text-sm text-ink-soft" numberOfLines={2}>
-          {recruit.content}
-        </Text>
-        <HorizontalCarousel contentContainerClassName="gap-1.5 pr-2" fadeColor="#F9FAFB">
-          {recruit.techStack.map((stack) => (
-            <View key={stack} className="rounded-full bg-amber-soft px-2 py-0.5">
-              <Text className="text-xs text-ink">{stack}</Text>
-            </View>
-          ))}
-        </HorizontalCarousel>
-      </Card>
-    </Pressable>
+          <Text className="text-sm leading-5 text-ink-soft" numberOfLines={2}>
+            {recruit.content}
+          </Text>
+          <HorizontalCarousel contentContainerClassName="gap-1.5 pr-2" fadeColor="#FFFFFF">
+            {recruit.techStack.map((stack) => (
+              <View key={stack} className="rounded-full border border-gray-200 px-2 py-0.5">
+                <Text className="text-xs text-ink-soft">{stack}</Text>
+              </View>
+            ))}
+          </HorizontalCarousel>
+        </Card>
+      </Pressable>
+    </Animated.View>
   );
 }

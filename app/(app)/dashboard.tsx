@@ -63,7 +63,7 @@ export default function DashboardScreen() {
 
   if (isSessionLoading || (session && isLoading)) {
     return (
-      <View className="flex-1 gap-4 bg-white p-4">
+      <View className="flex-1 gap-4 bg-canvas-soft p-4">
         <View className="h-8 w-32 rounded-md bg-gray-100" />
         <View className="h-16 w-full rounded-xl bg-gray-100" />
         <View className="h-16 w-full rounded-xl bg-gray-100" />
@@ -74,7 +74,7 @@ export default function DashboardScreen() {
 
   if (!session) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
+      <View className="flex-1 items-center justify-center gap-3 bg-canvas-soft px-6">
         <Text className="text-ink-soft">마이페이지는 로그인 후 이용할 수 있어요.</Text>
         <Button
           onPress={() => router.push("/(auth)/login")}
@@ -88,7 +88,7 @@ export default function DashboardScreen() {
 
   if (isError || !data) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
+      <View className="flex-1 items-center justify-center gap-3 bg-canvas-soft px-6">
         <Text className="text-ink-soft">마이페이지를 불러오지 못했어요.</Text>
         <Button onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2 shadow-none">
           <Text className="font-semibold text-ink">다시 시도</Text>
@@ -98,7 +98,7 @@ export default function DashboardScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="p-4 gap-6">
+    <ScrollView className="flex-1 bg-canvas-soft" contentContainerClassName="p-4 gap-6">
       <View className="flex-row items-center justify-between">
         <Text className="text-2xl font-extrabold tracking-tight text-ink">
           {data.profile?.nickname ?? "마이페이지"}
@@ -117,7 +117,7 @@ export default function DashboardScreen() {
             {data.myRecruits.map((item) => (
               <Card
                 key={item.id}
-                className="flex-row items-center gap-3 rounded-xl border-0 bg-gray-50 px-4 py-3.5 shadow-none"
+                className="flex-row items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 shadow-none"
               >
                 <Pressable
                   className="flex-1"
@@ -150,7 +150,7 @@ export default function DashboardScreen() {
             {data.myPosts.map((item) => (
               <Card
                 key={item.id}
-                className="flex-row items-center gap-3 rounded-xl border-0 bg-gray-50 px-4 py-3.5 shadow-none"
+                className="flex-row items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 shadow-none"
               >
                 <Pressable
                   className="flex-1"
@@ -182,7 +182,7 @@ export default function DashboardScreen() {
           <View className="gap-2">
             {data.myApplications.map((item) => (
               <Pressable key={item.id} onPress={() => router.push(`/(app)/recruit/${item.recruit.id}`)}>
-                <Card className="flex-row items-center gap-3 rounded-xl border-0 bg-gray-50 px-4 py-3.5 shadow-none">
+                <Card className="flex-row items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 shadow-none">
                   <Text className="flex-1 text-ink" numberOfLines={1}>
                     {item.recruit.title}
                   </Text>

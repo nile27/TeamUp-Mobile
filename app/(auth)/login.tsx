@@ -43,7 +43,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: COLORS.canvas }}
+      style={{ flex: 1, backgroundColor: COLORS.canvasSoft }}
       contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 24, paddingVertical: 40 }}
       keyboardShouldPersistTaps="handled"
       mode="layout"
@@ -59,7 +59,7 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
-        <View className="gap-5 rounded-2xl bg-gray-50 p-5">
+        <View className="gap-5 rounded-xl border border-gray-200 bg-white p-5">
           <View className="gap-1.5">
             <Text className="text-sm font-medium text-ink">이메일</Text>
             <View className="relative justify-center">
@@ -74,7 +74,7 @@ export default function LoginScreen() {
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
-                    className="h-12 rounded-lg border-0 bg-white py-3 pl-10 pr-4 text-ink shadow-sm shadow-black/5"
+                    className="h-12 rounded-lg border border-gray-200 bg-canvas-soft py-3 pl-10 pr-4 text-ink shadow-none"
                     placeholder="you@example.com"
                     autoCapitalize="none"
                     keyboardType="email-address"
@@ -105,7 +105,7 @@ export default function LoginScreen() {
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
-                    className="h-12 rounded-lg border-0 bg-white py-3 pl-10 pr-4 text-ink shadow-sm shadow-black/5"
+                    className="h-12 rounded-lg border border-gray-200 bg-canvas-soft py-3 pl-10 pr-4 text-ink shadow-none"
                     placeholder="********"
                     secureTextEntry
                     onChangeText={(text) => {

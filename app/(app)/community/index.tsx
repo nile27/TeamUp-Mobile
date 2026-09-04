@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { router } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, View } from "react-native";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
@@ -37,19 +38,19 @@ export default function CommunityListScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="flex-row flex-wrap gap-2 border-b border-gray-100 px-4 py-3">
+    <View className="flex-1 bg-canvas-soft">
+      <View className="flex-row flex-wrap gap-2 border-b border-gray-200 bg-white px-4 py-3">
         {COMMUNITY_TAG_FILTERS.map((filter) => {
           const active = tagFilter === filter.value;
           return (
             <Pressable
               key={filter.value}
               onPress={() => setTagFilter(filter.value)}
-              className={`rounded-full border px-3 py-1.5 ${
-                active ? "border-amber bg-amber-soft" : "border-gray-300"
+              className={`rounded-full border px-3 py-1.5 active:opacity-60 ${
+                active ? "border-amber-deep/30 bg-amber-soft" : "border-gray-200"
               }`}
             >
-              <Text className={active ? "text-ink" : "text-ink-soft"}>{filter.label}</Text>
+              <Text className={active ? "font-medium text-amber-deep" : "text-ink-soft"}>{filter.label}</Text>
             </Pressable>
           );
         })}
@@ -84,7 +85,7 @@ export default function CommunityListScreen() {
           keyExtractor={(item) => item.id}
           contentContainerClassName="gap-4 p-4"
           refreshControl={<RefreshControl refreshing={isManualRefreshing} onRefresh={handleManualRefresh} />}
-          renderItem={({ item }) => <CommunityCard post={item} />}
+          renderItem={({ item, index }) => <CommunityCard post={item} index={index} />}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -102,36 +103,38 @@ export default function CommunityListScreen() {
   );
 }
 
-function CommunityCard({ post }: { post: CommunityPost }) {
+function CommunityCard({ post, index }: { post: CommunityPost; index: number }) {
   return (
-    <Pressable onPress={() => router.push(`/(app)/community/${post.id}`)}>
-      <Card className="flex-row gap-3 rounded-2xl border-0 bg-gray-50 p-5 shadow-none">
-        <Avatar name={post.author.nickname} />
-        <View className="flex-1 gap-2">
-          <View className="self-start rounded-md bg-amber-soft px-2 py-1">
-            <Text className="text-xs font-semibold text-amber-deep">
-              {COMMUNITY_TAG_LABEL[post.tag]}
+    <Animated.View entering={FadeInUp.delay(Math.min(index, 8) * 60).duration(360)}>
+      <Pressable onPress={() => router.push(`/(app)/community/${post.id}`)}>
+        <Card className="flex-row gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-none">
+          <Avatar name={post.author.nickname} />
+          <View className="flex-1 gap-2">
+            <View className="self-start rounded-md bg-amber-soft px-2 py-1">
+              <Text className="text-xs font-semibold text-amber-deep">
+                {COMMUNITY_TAG_LABEL[post.tag]}
+              </Text>
+            </View>
+            <Text className="text-base font-bold tracking-tight text-ink" numberOfLines={1}>
+              {post.title}
             </Text>
-          </View>
-          <Text className="text-base font-semibold text-ink" numberOfLines={1}>
-            {post.title}
-          </Text>
-          <Text className="text-sm text-ink-soft" numberOfLines={2}>
-            {post.content}
-          </Text>
-          <View className="flex-row items-center gap-3">
-            <Text className="text-xs text-ink-soft">{post.author.nickname}</Text>
-            <View className="flex-row items-center gap-1">
-              <Ionicons name="heart" size={12} color={COLORS.amberDeep} />
-              <Text className="text-xs text-ink-soft">{post._count.likes}</Text>
-            </View>
-            <View className="flex-row items-center gap-1">
-              <Ionicons name="chatbubble-outline" size={12} color={COLORS.inkSoft} />
-              <Text className="text-xs text-ink-soft">{post._count.comments}</Text>
+            <Text className="text-sm leading-5 text-ink-soft" numberOfLines={2}>
+              {post.content}
+            </Text>
+            <View className="flex-row items-center gap-3">
+              <Text className="text-xs text-ink-soft">{post.author.nickname}</Text>
+              <View className="flex-row items-center gap-1">
+                <Ionicons name="heart" size={12} color={COLORS.amberDeep} />
+                <Text className="text-xs text-ink-soft">{post._count.likes}</Text>
+              </View>
+              <View className="flex-row items-center gap-1">
+                <Ionicons name="chatbubble-outline" size={12} color={COLORS.inkSoft} />
+                <Text className="text-xs text-ink-soft">{post._count.comments}</Text>
+              </View>
             </View>
           </View>
-        </View>
-      </Card>
-    </Pressable>
+        </Card>
+      </Pressable>
+    </Animated.View>
   );
 }

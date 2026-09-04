@@ -4,10 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text } from "@/components/ui/text";
 import { COLORS } from "@/config/theme";
 
-// redesign-existing-projects 스킬 감사 기준으로 다시 다듬음:
-// - 칩/네비 버튼에 색조 맞춘(tinted) 그림자 추가 — 순수 flat이라 깊이감이 없던 문제.
-// - 모든 Pressable에 눌림 피드백(active:opacity) 추가 — 눌러도 반응 없던 문제.
-// - 네비 버튼과 초기화 버튼을 시각적으로 한 그룹처럼 묶음(같은 크기·톤의 원형 버튼).
+// minimalist-ui 스킬(웜 모노크롬 + 절제된 파스텔) 파일럿 적용:
+// 색으로 꽉 채운 큰 박스(bg-amber-soft) 대신, 얇은 테두리 하나로만 경계를 표현하는
+// "문서형" 톤으로 전환. 그림자는 색조 강조 대신 흐릿하게 거의 안 보이는 정도로,
+// 활성 칩도 진한 단색 채움 대신 옅은 파스텔 배경 + 테두리로 절제.
 export function FilterCarousel({
   label,
   options,
@@ -30,34 +30,31 @@ export function FilterCarousel({
   };
 
   return (
-    <View className="gap-3 rounded-2xl bg-amber-soft p-4">
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <View className="h-2 w-2 rounded-full bg-amber" />
-          <Text className="text-sm font-semibold text-amber-deep">{label}</Text>
-        </View>
+    <View className="gap-3 rounded-xl border border-gray-200 bg-white p-4">
+      <View className="flex-row items-center justify-between border-b border-gray-100 pb-3">
+        <Text className="text-xs font-semibold uppercase tracking-wide text-ink-soft">{label}</Text>
 
-        <View className="flex-row items-center gap-2">
+        <View className="flex-row items-center gap-1.5">
           {selected.length > 0 && (
             <Pressable
               onPress={onReset}
-              className="h-7 flex-row items-center gap-1 rounded-full bg-white px-2.5 shadow-sm shadow-amber-deep/20 active:opacity-70"
+              className="h-7 flex-row items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 active:opacity-60"
             >
-              <Ionicons name="refresh" size={12} color={COLORS.amberDeep} />
-              <Text className="text-xs font-semibold text-amber-deep">초기화</Text>
+              <Ionicons name="refresh" size={12} color={COLORS.inkSoft} />
+              <Text className="text-xs font-medium text-ink-soft">초기화</Text>
             </Pressable>
           )}
           <Pressable
             onPress={() => scrollBy(-140)}
-            className="h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm shadow-amber-deep/20 active:opacity-70"
+            className="h-7 w-7 items-center justify-center rounded-md border border-gray-200 bg-white active:opacity-60"
           >
-            <Ionicons name="chevron-back" size={14} color={COLORS.amberDeep} />
+            <Ionicons name="chevron-back" size={14} color={COLORS.ink} />
           </Pressable>
           <Pressable
             onPress={() => scrollBy(140)}
-            className="h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm shadow-amber-deep/20 active:opacity-70"
+            className="h-7 w-7 items-center justify-center rounded-md border border-gray-200 bg-white active:opacity-60"
           >
-            <Ionicons name="chevron-forward" size={14} color={COLORS.amberDeep} />
+            <Ionicons name="chevron-forward" size={14} color={COLORS.ink} />
           </Pressable>
         </View>
       </View>
@@ -78,11 +75,11 @@ export function FilterCarousel({
             <Pressable
               key={option}
               onPress={() => onToggle(option)}
-              className={`rounded-full px-3.5 py-1.5 active:opacity-70 ${
-                active ? "bg-amber shadow-sm shadow-amber-deep/30" : "bg-white shadow-sm shadow-amber-deep/10"
+              className={`rounded-full border px-3.5 py-1.5 active:opacity-60 ${
+                active ? "border-amber-deep/30 bg-amber-soft" : "border-gray-200 bg-white"
               }`}
             >
-              <Text className={active ? "font-semibold text-ink" : "text-ink-soft"}>{option}</Text>
+              <Text className={active ? "font-medium text-amber-deep" : "text-ink-soft"}>{option}</Text>
             </Pressable>
           );
         })}

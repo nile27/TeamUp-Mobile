@@ -19,6 +19,8 @@ module.exports = {
           soft: "#6B6257",
         },
         canvas: "#FFFFFF",
+        // minimalist-ui 스킬 파일럿: 순백 대신 아주 옅은 웜 오프화이트 캔버스.
+        "canvas-soft": "#FBFBFA",
         // React Native Reusables(shadcn RN 포트) 컴포넌트가 쓰는 시맨틱 토큰.
         // 값은 global.css :root의 CSS 변수(amber/ink 브랜드 팔레트 매핑)를 참조.
         border: "hsl(var(--border))",

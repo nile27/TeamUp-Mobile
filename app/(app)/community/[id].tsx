@@ -46,7 +46,7 @@ export default function CommunityDetailScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 gap-4 bg-white p-4">
+      <View className="flex-1 gap-4 bg-canvas-soft p-4">
         <View className="h-6 w-20 rounded-md bg-gray-100" />
         <View className="h-8 w-3/4 rounded-md bg-gray-100" />
         <View className="h-4 w-1/2 rounded-md bg-gray-100" />
@@ -57,7 +57,7 @@ export default function CommunityDetailScreen() {
 
   if (isError || !post) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
+      <View className="flex-1 items-center justify-center gap-3 bg-canvas-soft px-6">
         <Text className="text-ink-soft">글을 불러오지 못했어요.</Text>
         <Button onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2 shadow-none">
           <Text className="font-semibold text-ink">다시 시도</Text>
@@ -122,7 +122,7 @@ export default function CommunityDetailScreen() {
     // 네이티브로 키보드 위치를 직접 추적하는 react-native-keyboard-controller로 해결.
     // mode="layout"이라 mt-auto인 입력 바가 키보드 공간만큼 실제로 밀려 올라옴.
     <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: COLORS.canvas }}
+      style={{ flex: 1, backgroundColor: COLORS.canvasSoft }}
       contentContainerStyle={{ flexGrow: 1 }}
       mode="layout"
       bottomOffset={16}
@@ -160,7 +160,7 @@ export default function CommunityDetailScreen() {
           onPress={handleLike}
           disabled={likeMutation.isPending}
           className={`flex-row items-center gap-1.5 self-start rounded-full border px-4 py-2 shadow-none ${
-            post.alreadyLiked ? "border-amber bg-amber-soft" : "border-gray-300"
+            post.alreadyLiked ? "border-amber-deep/30 bg-amber-soft" : "border-gray-200"
           }`}
         >
           <Ionicons
@@ -180,7 +180,10 @@ export default function CommunityDetailScreen() {
         ) : (
           <View className="gap-3">
             {post.comments.map((item) => (
-              <Card key={item.id} className="flex-row gap-3 rounded-lg border-0 bg-gray-50 p-3 shadow-none">
+              <Card
+                key={item.id}
+                className="flex-row gap-3 rounded-lg border border-gray-200 bg-white p-3 shadow-none"
+              >
                 <Avatar name={item.author.nickname} size={24} />
                 <View className="flex-1 gap-1">
                   <Text className="text-xs text-ink-soft">{item.author.nickname}</Text>
@@ -192,11 +195,11 @@ export default function CommunityDetailScreen() {
         )}
       </View>
 
-      <View className="mt-auto border-t border-gray-100 bg-white p-4">
+      <View className="mt-auto border-t border-gray-200 bg-white p-4">
         {commentError && <Text className="mb-2 text-sm text-red-500">{commentError}</Text>}
         <View className="flex-row items-center gap-2">
           <Input
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-ink"
+            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-ink"
             placeholder={session ? "댓글을 입력하세요" : "로그인 후 댓글을 남길 수 있어요"}
             value={commentText}
             onChangeText={setCommentText}

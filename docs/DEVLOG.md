@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-09-04 — `minimalist-ui` 스킬 파일럿 적용 (`design/from-scratch-taste-skill` 브랜치)
+
+**배경**: 기존 `redesign-existing-projects` 스킬 말고, `taste-skill` 레포에 있는 다른 스킬들로 "처음부터 새로 디자인"해보고 싶다는 요청 — 후보 검토 후 `minimalist-ui`(웜 모노크롬 + 절제된 파스텔, 에디토리얼 타이포)부터 시도하기로 함. 웹 CSS 기준 스킬이라 RN으로 재해석해서 적용(`redesign-existing-projects` 때와 같은 패턴).
+
+**설치**: `npx skills add https://github.com/Leonxlnx/taste-skill --skill "minimalist-ui"` — CLI가 두 번 중간에 멈춰서(타임아웃) `.agents/skills/minimalist-ui/SKILL.md`가 빈 채로 남았던 걸 GitHub에서 직접 받아 채우고 `skills-lock.json`도 수동으로 맞춤.
+
+**RN 재해석 요약**
+- 타이포/아이콘(커스텀 세리프 폰트, Phosphor 아이콘 교체)은 이번 파일럿 범위에서 제외 — 폰트 라이선스·전역 아이콘 교체는 비용이 커서 색/여백/테두리/모션만 우선 적용.
+- 색이 꽉 찬 큰 박스(필터 박스 `bg-amber-soft`, 랜딩 히어로 `bg-amber-soft` 등) → 흰 배경 + 얇은 테두리로. 스킬의 "큰 요소에 원색 배경 금지" 원칙.
+- 카드(`bg-gray-50` 배경 채움) → 흰 배경 + `border border-gray-200`, 그림자 완전 제거. radius도 `2xl`(16px)에서 스킬 권장 상한(`12px`) 쪽으로.
+- 새 색 토큰 `canvas-soft`(`#FBFBFA`, `tailwind.config.js` + `src/config/theme.ts`) 추가 — 순백 대신 아주 옅은 웜 오프화이트를 화면 배경으로.
+- 리스트(모집/커뮤니티/랜딩 섹션)에 `react-native-reanimated`의 `FadeInUp`으로 인덱스만큼 지연된 순차 진입 애니메이션 추가(이미 설치된 의존성이라 새 빌드 불필요).
+- 적용 범위: 모집 목록/상세/지원자 확인, 커뮤니티 목록/상세, 마이페이지, 로그인/회원가입/랜딩, 공용 헤더 — 전 화면.
+
+**사용자 반응**: "전 디자인이나 지금이나 둘 다 괜찮다" — 원래 디자인이 이미 웜톤/절제된 색 방향이라 극적인 차이가 안 느껴졌을 것으로 판단. 다음은 `design-taste-frontend`(더 과감한 스킬)로 비교해볼 예정.
+
+**검증**: `npx tsc --noEmit`, `npx expo export --platform web` 통과.
+
+---
+
 ## 2026-09-01 (3) — 앱 아이콘을 TeamUp 브랜드 로고로 교체
 
 **배경**: Expo 기본 템플릿 아이콘(파란 "A" 로고)을 그대로 쓰고 있던 것을 실제 브랜드 로고로 교체.

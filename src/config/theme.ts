@@ -6,4 +6,5 @@ export const COLORS = {
   ink: "#2B2620",
   inkSoft: "#6B6257",
   canvas: "#FFFFFF",
+  canvasSoft: "#FBFBFA",
 } as const;

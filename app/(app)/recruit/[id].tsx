@@ -32,7 +32,7 @@ export default function RecruitDetailScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 gap-4 bg-white p-4">
+      <View className="flex-1 gap-4 bg-canvas-soft p-4">
         <View className="h-6 w-20 rounded-md bg-gray-100" />
         <View className="h-8 w-3/4 rounded-md bg-gray-100" />
         <View className="h-4 w-1/2 rounded-md bg-gray-100" />
@@ -44,7 +44,7 @@ export default function RecruitDetailScreen() {
 
   if (isError || !recruit) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
+      <View className="flex-1 items-center justify-center gap-3 bg-canvas-soft px-6">
         <Text className="text-ink-soft">모집 정보를 불러오지 못했어요.</Text>
         <Button onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2 shadow-none">
           <Text className="font-semibold text-ink">다시 시도</Text>
@@ -93,7 +93,7 @@ export default function RecruitDetailScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-canvas-soft">
       <ScrollView contentContainerClassName="p-4 pb-24 gap-5">
         <View className="flex-row items-start justify-between">
           <View className="flex-1 gap-2">
@@ -140,10 +140,10 @@ export default function RecruitDetailScreen() {
 
         <View className="gap-2">
           <Text className="text-sm font-semibold text-ink">기술 스택</Text>
-          <HorizontalCarousel contentContainerClassName="gap-1.5 pr-4">
+          <HorizontalCarousel contentContainerClassName="gap-1.5 pr-4" fadeColor="#FBFBFA">
             {recruit.techStack.map((stack) => (
-              <View key={stack} className="rounded-full bg-amber-soft px-3 py-1.5">
-                <Text className="text-xs text-ink">{stack}</Text>
+              <View key={stack} className="rounded-full border border-gray-200 bg-white px-3 py-1.5">
+                <Text className="text-xs text-ink-soft">{stack}</Text>
               </View>
             ))}
           </HorizontalCarousel>
@@ -152,7 +152,10 @@ export default function RecruitDetailScreen() {
         <View className="gap-2">
           <Text className="text-sm font-semibold text-ink">모집 역할</Text>
           {recruit.roles.map((role) => (
-            <View key={role.id} className="flex-row justify-between rounded-lg bg-gray-50 px-3 py-2">
+            <View
+              key={role.id}
+              className="flex-row justify-between rounded-lg border border-gray-200 bg-white px-3 py-2"
+            >
               <Text className="text-ink">{role.name}</Text>
               <Text className="text-ink-soft">{role.count}명</Text>
             </View>
@@ -160,7 +163,7 @@ export default function RecruitDetailScreen() {
         </View>
       </ScrollView>
 
-      <View className="absolute bottom-0 left-0 right-0 border-t border-gray-100 bg-white p-4">
+      <View className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-4">
         {applyError && <Text className="mb-2 text-sm text-red-500">{applyError}</Text>}
         <Button
           onPress={handleApply}

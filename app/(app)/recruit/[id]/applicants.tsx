@@ -1,5 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { View, RefreshControl, ScrollView } from "react-native";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -32,7 +33,7 @@ export default function RecruitApplicantsScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 gap-3 bg-white p-4">
+      <View className="flex-1 gap-3 bg-canvas-soft p-4">
         <View className="h-24 w-full rounded-2xl bg-gray-100" />
         <View className="h-24 w-full rounded-2xl bg-gray-100" />
         <View className="h-24 w-full rounded-2xl bg-gray-100" />
@@ -42,7 +43,7 @@ export default function RecruitApplicantsScreen() {
 
   if (isError || !data) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-white px-6">
+      <View className="flex-1 items-center justify-center gap-3 bg-canvas-soft px-6">
         <Text className="text-ink-soft">지원자 목록을 불러오지 못했어요.</Text>
         <Button onPress={() => refetch()} className="rounded-lg bg-amber px-4 py-2 shadow-none">
           <Text className="font-semibold text-ink">다시 시도</Text>
@@ -53,7 +54,7 @@ export default function RecruitApplicantsScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-white"
+      className="flex-1 bg-canvas-soft"
       contentContainerClassName="gap-4 p-4"
       refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}
     >
@@ -62,8 +63,8 @@ export default function RecruitApplicantsScreen() {
           <Text className="text-ink-soft">아직 지원자가 없어요.</Text>
         </View>
       ) : (
-        data.applications.map((application) => (
-          <ApplicantCard key={application.id} recruitId={id} application={application} />
+        data.applications.map((application, index) => (
+          <ApplicantCard key={application.id} recruitId={id} application={application} index={index} />
         ))
       )}
     </ScrollView>
@@ -73,15 +74,18 @@ export default function RecruitApplicantsScreen() {
 function ApplicantCard({
   recruitId,
   application,
+  index,
 }: {
   recruitId: string;
   application: ApplicantApplication;
+  index: number;
 }) {
   const statusMutation = useUpdateApplicationStatus(recruitId);
   const { applicant } = application;
 
   return (
-    <Card className="gap-3 rounded-2xl border-0 bg-gray-50 p-5 shadow-none">
+    <Animated.View entering={FadeInUp.delay(Math.min(index, 8) * 60).duration(360)}>
+    <Card className="gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-none">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <Avatar name={applicant.nickname} size={32} />
@@ -100,14 +104,14 @@ function ApplicantCard({
       {applicant.bio && <Text className="text-sm leading-5 text-ink-soft">{applicant.bio}</Text>}
 
       {applicant.portfolio && (
-        <View className="gap-1 rounded-lg bg-white p-3">
+        <View className="gap-1 rounded-lg border border-gray-200 bg-canvas-soft p-3">
           <Text className="text-xs font-semibold text-ink-soft">포트폴리오 · 경력</Text>
           <Text className="text-sm leading-5 text-ink">{applicant.portfolio}</Text>
         </View>
       )}
 
       {application.message && (
-        <View className="rounded-lg bg-white p-3">
+        <View className="rounded-lg border border-gray-200 bg-canvas-soft p-3">
           <Text className="text-sm leading-5 text-ink">{application.message}</Text>
         </View>
       )}
@@ -134,5 +138,6 @@ function ApplicantCard({
         </View>
       )}
     </Card>
+    </Animated.View>
   );
 }

@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { Pressable, ScrollView, View } from "react-native";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
@@ -55,7 +56,7 @@ const ROLES = [
 
 export default function LandingScreen() {
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-canvas-soft">
       <ScrollView contentContainerClassName="pb-10">
         <View className="flex-row items-center gap-2 px-4 pb-2 pt-6">
           <Pressable onPress={() => router.back()} hitSlop={8} className="active:opacity-60">
@@ -63,8 +64,8 @@ export default function LandingScreen() {
           </Pressable>
         </View>
 
-        {/* Hero */}
-        <View className="gap-5 bg-amber-soft px-6 pb-12 pt-4">
+        {/* Hero — minimalist-ui 파일럿: 큰 색 배경 채움 대신 흰 배경 + 하단 경계선만으로 구획 */}
+        <View className="gap-5 border-b border-gray-200 bg-white px-6 pb-12 pt-4">
           <Text className="text-4xl font-extrabold leading-[1.15] tracking-tight text-ink">
             개발 못 해도,{"\n"}기획자로 참여하세요
           </Text>
@@ -73,14 +74,14 @@ export default function LandingScreen() {
           </Text>
           <View className="mt-2 flex-row gap-3">
             <Button
-              className="flex-1 items-center rounded-lg bg-amber py-3 shadow-sm shadow-amber-deep/30 active:opacity-80"
+              className="flex-1 items-center rounded-lg bg-amber py-3 shadow-none active:opacity-80"
               onPress={() => router.push("/(auth)/signup")}
             >
               <Text className="font-semibold text-ink">시작하기</Text>
             </Button>
             <Button
               variant="outline"
-              className="flex-1 items-center rounded-lg border-ink py-3 shadow-none active:opacity-70"
+              className="flex-1 items-center rounded-lg border-gray-300 py-3 shadow-none active:opacity-70"
               onPress={() => router.replace("/(app)/recruit")}
             >
               <Text className="font-semibold text-ink">둘러보기</Text>
@@ -95,8 +96,12 @@ export default function LandingScreen() {
             <Text className="text-2xl font-extrabold tracking-tight text-ink">이런 고민 해보신 적 있나요?</Text>
           </View>
           <View className="gap-6">
-            {PROBLEMS.map((p) => (
-              <View key={p.title} className="flex-row gap-4">
+            {PROBLEMS.map((p, index) => (
+              <Animated.View
+                key={p.title}
+                entering={FadeInUp.delay(index * 80).duration(400)}
+                className="flex-row gap-4"
+              >
                 <View className="h-11 w-11 items-center justify-center rounded-full bg-amber-soft">
                   <Ionicons name={p.icon} size={20} color={COLORS.amberDeep} />
                 </View>
@@ -104,28 +109,32 @@ export default function LandingScreen() {
                   <Text className="font-bold text-ink">{p.title}</Text>
                   <Text className="text-sm leading-5 text-ink-soft">{p.desc}</Text>
                 </View>
-              </View>
+              </Animated.View>
             ))}
           </View>
         </View>
 
         {/* How it works */}
-        <View className="gap-7 bg-gray-50 px-6 py-12">
+        <View className="gap-7 border-y border-gray-200 bg-gray-50 px-6 py-12">
           <View className="gap-1.5">
             <Text className="text-xs font-bold uppercase tracking-wide text-amber-deep">How it works</Text>
             <Text className="text-2xl font-extrabold tracking-tight text-ink">기획부터 런칭까지, 이렇게 진행됩니다</Text>
           </View>
           <View className="gap-6">
-            {STEPS.map((step) => (
-              <View key={step.num} className="flex-row gap-4">
-                <View className="h-9 w-9 items-center justify-center rounded-full bg-amber shadow-sm shadow-amber-deep/30">
-                  <Text className="font-extrabold text-ink">{step.num}</Text>
+            {STEPS.map((step, index) => (
+              <Animated.View
+                key={step.num}
+                entering={FadeInUp.delay(index * 80).duration(400)}
+                className="flex-row gap-4"
+              >
+                <View className="h-9 w-9 items-center justify-center rounded-full border border-amber-deep/40 bg-white">
+                  <Text className="font-extrabold text-amber-deep">{step.num}</Text>
                 </View>
                 <View className="flex-1 gap-1 pt-1">
                   <Text className="font-bold text-ink">{step.title}</Text>
                   <Text className="text-sm leading-5 text-ink-soft">{step.desc}</Text>
                 </View>
-              </View>
+              </Animated.View>
             ))}
           </View>
         </View>
@@ -137,23 +146,24 @@ export default function LandingScreen() {
             <Text className="text-2xl font-extrabold tracking-tight text-ink">어떤 역할로 참여할 수 있나요?</Text>
           </View>
           <View className="gap-4">
-            {ROLES.map((role) => (
-              <View
+            {ROLES.map((role, index) => (
+              <Animated.View
                 key={role.title}
-                className="gap-2 rounded-2xl bg-gray-50 p-5 shadow-sm shadow-amber-deep/10"
+                entering={FadeInUp.delay(index * 80).duration(400)}
+                className="gap-2 rounded-xl border border-gray-200 bg-white p-5 shadow-none"
               >
                 <View className="h-11 w-11 items-center justify-center rounded-full bg-amber-soft">
                   <Ionicons name={role.icon} size={20} color={COLORS.amberDeep} />
                 </View>
                 <Text className="font-bold text-ink">{role.title}</Text>
                 <Text className="text-sm leading-5 text-ink-soft">{role.desc}</Text>
-              </View>
+              </Animated.View>
             ))}
           </View>
         </View>
 
         {/* Final CTA */}
-        <View className="gap-3 px-6 pt-8 text-center">
+        <View className="gap-3 border-t border-gray-200 px-6 pb-2 pt-8 text-center">
           <Text className="text-center text-2xl font-extrabold tracking-tight text-ink">
             지금 바로 당신의 아이디어를{"\n"}팀과 공유하세요
           </Text>
@@ -161,7 +171,7 @@ export default function LandingScreen() {
             망설이지 마세요. 완벽한 계획보다 빠른 실행이 프로젝트의 첫 걸음입니다.
           </Text>
           <Button
-            className="mt-2 items-center rounded-lg bg-amber py-3 shadow-sm shadow-amber-deep/30 active:opacity-80"
+            className="mt-2 items-center rounded-lg bg-amber py-3 shadow-none active:opacity-80"
             onPress={() => router.push("/(auth)/signup")}
           >
             <Text className="font-semibold text-ink">프로젝트 시작하기</Text>

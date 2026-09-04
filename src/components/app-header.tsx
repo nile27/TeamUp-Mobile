@@ -23,7 +23,7 @@ export function AppHeader({
 
   return (
     <View
-      className="flex-row items-center justify-between border-b border-gray-100 bg-white px-4 pb-3"
+      className="flex-row items-center justify-between border-b border-gray-200 bg-white px-4 pb-3"
       style={{ paddingTop: insets.top + 8 }}
     >
       <View className="flex-row items-center gap-3">
