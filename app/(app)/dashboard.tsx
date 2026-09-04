@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
@@ -19,7 +20,7 @@ const APPLICATION_STATUS_LABEL: Record<string, string> = {
 
 export default function DashboardScreen() {
   const { session, isLoading: isSessionLoading } = useSession();
-  const { data, isLoading, isError, refetch } = useDashboard(!!session);
+  const { data, isLoading, isError, error, refetch } = useDashboard(!!session);
   const deleteRecruitMutation = useDeleteRecruit();
   const deletePostMutation = useDeleteCommunityPost();
 
@@ -27,6 +28,18 @@ export default function DashboardScreen() {
     await supabase.auth.signOut();
     router.replace("/(auth)/login");
   };
+
+  // RN에서는 앱이 백그라운드에 있는 동안 Supabase의 세션 자동 갱신 타이머가 멈춰서,
+  // 오래 켜두고 방치한 기기에 만료된 세션이 그대로 남아있는 경우가 있었음(로그인 안
+  // 했는데 로그인된 것처럼 보이다가 API가 401을 내는 증상). 그 자체는 supabase.ts의
+  // AppState 연동으로 앞으로는 재발을 줄였지만, 이미 401이 난 시점엔 재시도 버튼으로는
+  // 절대 못 벗어나는 막다른 상태라 여기서 즉시 로그아웃 처리해 로그인 화면으로 보냄.
+  useEffect(() => {
+    if (error instanceof ApiError && error.status === 401) {
+      handleLogout();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   const handleDeleteRecruit = (id: string) => {
     Alert.alert("이 모집글을 삭제할까요?", "지원 내역을 포함해 되돌릴 수 없습니다.", [
