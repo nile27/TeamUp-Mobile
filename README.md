@@ -2,7 +2,7 @@
 
 🌐 [웹 저장소 바로가기](https://github.com/nile27/TeamUp)
 🚀 [배포 사이트 (웹 버전)](https://team-up-olive.vercel.app)
-📱 [모바일 APK 다운로드](https://github.com/nile27/TeamUp-Mobile/releases/tag/v1.0.0-internal)
+📱 [모바일 APK 다운로드](https://github.com/nile27/TeamUp-Mobile/releases/tag/v1.3.0-internal)
 
 TeamUp 웹(`../TeamUp`, Next.js)의 핵심 사용자 여정 하나(개발자가 프로젝트 찾아 지원)를 RN으로 확장한 파일럿. React 역량의 모바일 확장 증명(포트폴리오/파일럿) 목적 — 실서비스 대체나 전체 기능 패리티는 목표가 아님.
 
